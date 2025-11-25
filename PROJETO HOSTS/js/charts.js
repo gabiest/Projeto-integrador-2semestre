@@ -142,6 +142,7 @@ function desenharGraficoTipos(ativos) {
     const ctxCanvas = document.getElementById('assetTypeChart');
     if (!ctxCanvas) return;
     
+    // Lógica de contagem (continua igual)
     let pc = 0, impressora = 0, servidor = 0, outros = 0;
 
     ativos.forEach(a => {
@@ -153,7 +154,12 @@ function desenharGraficoTipos(ativos) {
     });
 
     const ctx = ctxCanvas.getContext('2d');
-    const gradientBar = createGradient(ctx, colors.purpleLight, colors.purple);
+
+    // 👇 A MUDANÇA ESTÁ AQUI: Gradiente AZUL específico para este gráfico
+    // Azul Claro (#29b6f6) até Azul Escuro (#0277bd)
+    const gradientBar = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientBar.addColorStop(0, '#29b6f6'); // Azul Ciano (Topo)
+    gradientBar.addColorStop(1, '#01579b'); // Azul Profundo (Base)
 
     if (typeChart) typeChart.destroy();
 
@@ -162,9 +168,9 @@ function desenharGraficoTipos(ativos) {
         data: {
             labels: ['Computadores', 'Impressoras', 'Servidores', 'Outros'],
             datasets: [{
-                label: 'Qtd',
+                label: 'Quantidade',
                 data: [pc, impressora, servidor, outros],
-                backgroundColor: gradientBar,
+                backgroundColor: gradientBar, // Usa o azul que criamos acima
                 borderRadius: 6,
                 barPercentage: 0.6
             }]
@@ -172,10 +178,6 @@ function desenharGraficoTipos(ativos) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: {
-                duration: 1500, // Duração da subida das barras
-                easing: 'easeOutQuart'
-            },
             plugins: { legend: { display: false } },
             scales: {
                 y: {
