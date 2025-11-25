@@ -1,144 +1,193 @@
+/**
+ * ARQUIVO: js/charts.js
+ * Com animação de contagem nos números!
+ */
 
-       // --- CRIAÇÃO DOS GRÁFICOS (Chart.js) ---
-        // Cores e Configs AJUSTADAS PARA TEXTO BRANCO E GRADES BRANCAS
-        const blue = '#00BFFF'; // Cor da linha do gráfico de performance
-        const success = '#41f1b6';
-        const warning = '#ffbb55';
-        const danger = '#ff7782';
-        const textColorChart = '#FFFFFF'; // Texto principal dos gráficos (BRANCO)
-        const textSecondaryChart = 'rgba(255, 255, 255, 0.7)'; // Texto secundário (legendas, eixos) (BRANCO com transparência)
-        const gridColor = 'rgba(255, 255, 255, 0.1)';
-        const darkOrange = 'rgba(255, 140, 0, 0.8)'; // Linhas de grade (BRANCO bem transparente)
-        const lightYellow = 'rgba(255, 215, 0, 0.8)';
-        const darkGreen = 'rgba(0, 128, 128, 0.9)';   // <-- ADICIONE ESTA LINHA (Verde escuro/Teal)
-        const lightGreen = success;
+// --- CONFIGURAÇÕES GLOBAIS ---
+Chart.defaults.font.family = 'Arimo';
+Chart.defaults.color = '#FFFFFF'; 
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
 
-        // Configurações Padrão para TODOS os gráficos
-        Chart.defaults.color = textColorChart; // Define a cor PADRÃO do texto do gráfico
-        Chart.defaults.font.family = 'Arimo';
-        Chart.defaults.plugins.legend.display = false; // Desliga legendas por padrão (ligaremos no doughnut)
-        Chart.defaults.plugins.legend.labels.color = textSecondaryChart; // Cor padrão da legenda
-        Chart.defaults.plugins.tooltip.titleColor = textColorChart; // Cor do título no tooltip
-        Chart.defaults.plugins.tooltip.bodyColor = textSecondaryChart; // Cor do corpo no tooltip
+const colors = {
+    success: '#2ecc71',  // Verde Esmeralda (Suave)
+    danger: '#ff6b6b',   // Vermelho Coral (Não agride o olho)
+    warning: '#feca57',  // Amarelo Pastel 
+    purple: '#7236c6',   
+    purpleLight: '#a788d9',
+    textSecondary: 'rgba(255, 255, 255, 0.8)'
+};
 
-        // Define cores dos EIXOS (ticks - os números/nomes) e das LINHAS DE GRADE
-        Chart.defaults.scales.category.ticks.color = textSecondaryChart; // Eixo X (categorias - Seg, Ter...)
-        Chart.defaults.scales.category.grid.color = gridColor;          // Linhas verticais da grade
-        Chart.defaults.scales.linear.ticks.color = textSecondaryChart; // Eixo Y (valores - 24, 26...)
-        Chart.defaults.scales.linear.grid.color = gridColor;           // Linhas horizontais da grade
+function createGradient(ctx, colorStart, colorEnd) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, colorStart);
+    gradient.addColorStop(1, colorEnd);
+    return gradient;
+}
 
-        function createGradient(ctx, color1, color2) {
-            // ... (sua função createGradient continua igual) ...
-             if (!ctx || !ctx.canvas) return color1; 
-            const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-            gradient.addColorStop(0, color1);
-            gradient.addColorStop(1, color2);
-            return gradient;
-        }
+document.addEventListener('DOMContentLoaded', () => {
+    carregarDadosDashboard();
+    setInterval(carregarDadosDashboard, 30000);
+});
+
+let statusChart = null;
+let typeChart = null;
+
+async function carregarDadosDashboard() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/ativos');
+        const ativos = await response.json();
+
+        const total = ativos.length;
+        const online = ativos.filter(a => a.status === 'Online').length;
+        const offline = ativos.filter(a => a.status === 'Offline').length;
+        const manutencao = ativos.filter(a => a.condicao === 'Manutenção').length; 
         
+        // Calcula disponibilidade (ex: 16.7)
+        const disponibilidadeNum = total > 0 ? ((online / total) * 100) : 0;
+
+        // --- AQUI ENTRA A ANIMAÇÃO DOS NÚMEROS ---
+        // Chama a função especial em vez de apenas exibir o texto
         
+        animarNumero('online-assets-dash', online, 0);       // Inteiro
+        animarNumero('offline-assets-count', offline, 0);    // Inteiro
+        animarNumero('availability-value', disponibilidadeNum, 1, '%'); // Com 1 casa decimal e %
 
-        // --- INICIALIZAÇÃO DOS GRÁFICOS --- 
-        // (O código de new Chart(...) para cada gráfico continua igual abaixo,
-        // as cores dos textos já foram definidas nos Chart.defaults acima)
+        // Atualiza Gráficos
+        desenharGraficoStatus(online, offline, manutencao);
+        desenharGraficoTipos(ativos);
 
-        // Gráfico 1: Performance
-        const performanceCtx = document.getElementById('performanceChart')?.getContext('2d');
-        if (performanceCtx) {
-            // ... (o código para criar o gráfico de performance continua igual) ...
-             const gradientBgLine = createGradient(performanceCtx, '#fff', '#fff');
-            new Chart(performanceCtx, {
-                type: 'line',
-                data: { 
-                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-                    datasets: [{
-                        label: 'Latência (ms)',
-                        data: [30, 25, 35, 28, 40, 32, 38],
-                        borderColor: blue, backgroundColor: gradientBgLine, tension: 0.4, fill: true, pointBackgroundColor: blue, pointRadius: 3, pointHoverRadius: 5
-                    }]
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        y: { beginAtZero: true }, 
-                        x: {} 
-                    },
-                    plugins: { legend: { display: false } } // Legenda desabilitada para este
-                }
-            });
-        }
-
-        // Gráfico 2: Status
-        const statusCtx = document.getElementById('statusChart')?.getContext('2d');
-        if (statusCtx) {
-             // Certifique-se que totalAssets e onlineAssetsCount estão definidos antes daqui
-             const offlineAssets = totalAssets - onlineAssetsCount; 
-             const alertAssetsNow = assetsData.filter(a => a.condition === 'Atenção' || a.condition === 'Crítico').length; 
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: { 
-                    labels: ['Online', 'Offline', 'Em Alerta'],
-                    datasets: [{
-                        data: [onlineAssetsCount, offlineAssets, alertAssetsNow],
-                        backgroundColor: [successColor, dangerColor, warningColor], 
-                        borderColor: 'var(--bg-card)', /* Cor de fundo do cartão para borda */
-                        borderWidth: 5, 
-                        hoverOffset: 8
-                    }]
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    cutout: '70%', 
-                    plugins: { 
-                        legend: { 
-                            display: true, 
-                            position: 'bottom', 
-                            labels: { 
-                                padding: 15, 
-                                boxWidth: 12 
-                                // A cor já está definida nos defaults
-                            } 
-                        } 
-                    } 
-                }
-            });
-        }
-
-        // Gráfico 3: Tipo de Ativos
-    const assetTypeCtx = document.getElementById('assetTypeChart')?.getContext('2d');
-    if (assetTypeCtx && typeof assetsData !== 'undefined') {
-         const assetTypes = assetsData.reduce((acc, asset) => {
-             const type = asset.type || 'Outro';
-             acc[type] = (acc[type] || 0) + 1;
-             return acc;
-         }, {});
-         const labels = Object.keys(assetTypes);
-         const dataCounts = Object.values(assetTypes);
-
-         // --- MODIFICAÇÃO AQUI ---
-         // Cria o gradiente amarelo/laranja
-         const greenGradient = createGradient(assetTypeCtx, lightGreen, darkGreen); // <-- SUBSTITUA yellowGradient
-
-        new Chart(assetTypeCtx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Quantidade',
-                    data: dataCounts,
-                    // Usa o novo gradiente amarelo
-                    backgroundColor: yellowGradient, // <-- SUBSTITUA A LINHA ANTIGA POR ESTA
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                // ... (resto das opções continua igual) ...
-                 maintainAspectRatio: false,
-                scales: {
-                    y: { ticks: { stepSize: 1 } },
-                    x: {}
-                },
-                plugins: { legend: { display: false } }
-            }
-        });
+    } catch (error) {
+        console.error("Erro:", error);
     }
+}
+
+/**
+ * FUNÇÃO MÁGICA DE ANIMAÇÃO DE NÚMEROS
+ * @param {string} id - ID do elemento HTML
+ * @param {number} valorFinal - O número onde deve parar
+ * @param {number} decimais - Quantas casas decimais (0 para inteiros)
+ * @param {string} sufixo - Símbolo para colocar no final (ex: "%")
+ */
+function animarNumero(id, valorFinal, decimais = 0, sufixo = '') {
+    const elemento = document.getElementById(id);
+    if (!elemento) return;
+
+    const duracao = 1500; // Duração da animação em ms (1.5 segundos)
+    const frameDuration = 1000 / 60; // 60 fps
+    const totalFrames = Math.round(duracao / frameDuration);
+    
+    let frameAtual = 0;
+    
+    const contador = setInterval(() => {
+        frameAtual++;
+        
+        // Função de "Easing" (suavização) para começar rápido e terminar devagar
+        const progresso = frameAtual / totalFrames;
+        const valorAtual = valorFinal * (1 - Math.pow(1 - progresso, 3)); // Cubic ease-out
+
+        if (frameAtual === totalFrames) {
+            clearInterval(contador);
+            // Garante que termine exatamente no número certo
+            elemento.innerText = valorFinal.toFixed(decimais) + sufixo;
+        } else {
+            elemento.innerText = valorAtual.toFixed(decimais) + sufixo;
+        }
+    }, frameDuration);
+}
+
+// --- GRÁFICOS (Mantidos iguais) ---
+
+function desenharGraficoStatus(online, offline, manutencao) {
+    const ctx = document.getElementById('statusChart');
+    if (!ctx) return;
+
+    if (statusChart) statusChart.destroy();
+
+    statusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Online', 'Offline', 'Manutenção'],
+            datasets: [{
+                data: [online, offline, manutencao],
+                backgroundColor: [colors.success, colors.danger, colors.warning],
+                borderColor: 'var(--bg-card)', 
+                borderWidth: 0,
+                hoverOffset: 8 
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            animation: {
+                animateScale: true, // Anima o crescimento da rosca
+                animateRotate: true // Anima a rotação
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#fff',
+                        font: { size: 13, weight: 'bold' },
+                        padding: 20,
+                        usePointStyle: true 
+                    }
+                }
+            }
+        }
+    });
+}
+
+function desenharGraficoTipos(ativos) {
+    const ctxCanvas = document.getElementById('assetTypeChart');
+    if (!ctxCanvas) return;
+    
+    let pc = 0, impressora = 0, servidor = 0, outros = 0;
+
+    ativos.forEach(a => {
+        const nome = (a.nome || '').toLowerCase();
+        if (nome.includes('pc') || nome.includes('desk') || nome.includes('note') || nome.includes('windows')) pc++;
+        else if (nome.includes('imp') || nome.includes('print') || nome.includes('epson')) impressora++;
+        else if (nome.includes('serv') || nome.includes('srv')) servidor++;
+        else outros++;
+    });
+
+    const ctx = ctxCanvas.getContext('2d');
+    const gradientBar = createGradient(ctx, colors.purpleLight, colors.purple);
+
+    if (typeChart) typeChart.destroy();
+
+    typeChart = new Chart(ctxCanvas, {
+        type: 'bar',
+        data: {
+            labels: ['Computadores', 'Impressoras', 'Servidores', 'Outros'],
+            datasets: [{
+                label: 'Qtd',
+                data: [pc, impressora, servidor, outros],
+                backgroundColor: gradientBar,
+                borderRadius: 6,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1500, // Duração da subida das barras
+                easing: 'easeOutQuart'
+            },
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    ticks: { color: '#fff', font: { weight: 'bold' } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#fff', font: { weight: 'bold' } }
+                }
+            }
+        }
+    });
+}

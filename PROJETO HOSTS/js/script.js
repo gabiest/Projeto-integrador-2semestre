@@ -2,32 +2,37 @@
 /* eslint-disable no-unused-vars */
 
 /**
- * Gestor GLOBAL (Limpo)
- * Controla apenas: Menu Lateral, Toasts, Modais Globais e Configurações de Usuário.
- * A lógica específica de cada página (tabelas, gráficos) agora fica no próprio HTML.
+ * ARQUIVO: js/script.js
+ * OBJETIVO: Gestor GLOBAL do Site
+ * FUNCIONALIDADES: Menu Lateral, Toasts (Avisos), Modais, Configurações de Usuário.
+ * * IMPORTANTE: Este arquivo NÃO deve conter lógica de Tabelas ou Gráficos.
+ * - Para Tabelas: use 'js/inventario.js'
+ * - Para Gráficos: use 'js/charts.js'
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- 1. SELEÇÃO DE ELEMENTOS GERAIS (MENU) ---
+    // ============================================================
+    // 1. MENU LATERAL E NAVEGAÇÃO
+    // ============================================================
     const botaoMenu = document.querySelector('.botao-menu');
     const menuLateral = document.querySelector('.menu-lateral');
     const conteudo = document.querySelector('.conteudo');
     const background = document.querySelector('.background');
     
-    // --- 2. LÓGICA DO MENU LATERAL ---
     const toggleMenu = () => {
         if (menuLateral) menuLateral.classList.toggle('ativo');
         if (botaoMenu) botaoMenu.classList.toggle('ativo');
         if (conteudo) conteudo.classList.toggle('ativo');
         if (background) background.classList.toggle('ativo');
         
-        // Específico para a Home, se existir
+        // Específico para a Home (Tela de Boas-Vindas)
         const welcomeScreen = document.querySelector('main.welcome-screen');
         if (welcomeScreen) welcomeScreen.classList.toggle('ativo');
     };
 
     if (botaoMenu) botaoMenu.addEventListener('click', toggleMenu);
+    
     if (background) {
         background.addEventListener('click', () => {
             if (menuLateral && menuLateral.classList.contains('ativo')) {
@@ -36,12 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 3. LÓGICA DO TOAST (Notificação Global) ---
+    // ============================================================
+    // 2. SISTEMA DE TOAST (NOTIFICAÇÕES GLOBAIS)
+    // ============================================================
     const toastContainer = document.getElementById('toast-container');
     
-    // Define a função showToast globalmente para ser usada pelos arquivos HTML
+    // Função Global acessível por outros scripts (inventario.js, charts.js)
     window.showToast = (message, type = 'info', duration = 3000) => {
-        if (!toastContainer) return; // Se não tiver container na página, ignora
+        if (!toastContainer) return; 
 
         const toast = document.createElement('div');
         toast.classList.add('toast', type);
@@ -51,8 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'error') iconClass = 'bi-x-octagon-fill';
         
         toast.innerHTML = `<i class="bi ${iconClass}"></i> <span>${message}</span>`;
-        toastContainer.prepend(toast); // Adiciona no topo
+        toastContainer.prepend(toast); 
 
+        // Animação de entrada e saída
         const removeTimer = setTimeout(() => {
             toast.style.animation = 'fadeOutToast 0.5s ease forwards';
             toast.addEventListener('animationend', () => toast.remove());
@@ -72,17 +80,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(style);
     }
 
-    // --- 4. FUNÇÕES GLOBAIS DE USUÁRIO (LocalStorage) ---
+    // ============================================================
+    // 3. GERENCIAMENTO DE USUÁRIO (LOCALSTORAGE)
+    // ============================================================
     const loadUserToUI = () => {
         try {
             const raw = localStorage.getItem('app_user');
             if (!raw) return;
             const user = JSON.parse(raw);
             
-            // Atualiza nome no menu/configurações se os elementos existirem
+            // Atualiza nome no menu
             const profileSpan = document.getElementById('profile-username');
             if (profileSpan && user.name) profileSpan.textContent = user.name;
             
+            // Atualiza campos na página de configurações
             const currentUsername = document.getElementById('current-username');
             if (currentUsername && user.name) currentUsername.value = user.name;
             
@@ -93,8 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // Carrega usuário ao iniciar
-    loadUserToUI();
+    loadUserToUI(); // Carrega ao iniciar
 
     // Listener para salvar perfil (Apenas na página de Configurações)
     const formPerfil = document.getElementById('form-nome-email');
@@ -121,44 +131,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. LÓGICA DA PÁGINA DE CONFIGURAÇÕES (Links e Modais) ---
-    // (Isso só roda se os elementos existirem na página atual)
+    // ============================================================
+    // 4. LÓGICA DE CONFIGURAÇÕES (LINKS E MODAIS)
+    // ============================================================
 
-    // Abrir modal de perfil clicando no cartão
+    // Abrir modal de perfil
     const perfilCard = document.querySelector('.cartao-perfil');
     if (perfilCard) {
         perfilCard.onclick = () => window.openModal('modal-nome-email');
     }
 
-    // Configurações: Trocar Senha
+    // Trocar Senha
     const linkSenha = document.querySelector('.bi-key')?.closest('a');
     if (linkSenha) {
         linkSenha.onclick = (e) => { e.preventDefault(); window.openModal('modal-trocar-senha'); };
     }
-    // Form Trocar Senha
     const formSenha = document.getElementById('form-trocar-senha');
     if (formSenha) {
         formSenha.onsubmit = (e) => {
             e.preventDefault();
-            // Aqui entraria a lógica de API para senha
             window.closeModal('modal-trocar-senha');
             window.showToast('Senha alterada com sucesso!', 'success');
         };
     }
 
-    // Configurações: Termos
+    // Termos e Atualização
     const linkTermos = document.querySelector('.bi-file-earmark-text')?.closest('a');
     if (linkTermos) {
         linkTermos.onclick = (e) => { e.preventDefault(); window.openModal('modal-termos-condicoes'); };
     }
-
-    // Configurações: Atualização
     const linkUpdate = document.querySelector('.bi-cloud-download')?.closest('a');
     if (linkUpdate) {
         linkUpdate.onclick = (e) => { e.preventDefault(); window.openModal('modal-atualizacao-software'); };
     }
 
-    // "Olho" da senha
+    // Ícone de "Olho" da senha
     document.querySelectorAll('.password-toggle-icon').forEach(icon => {
         icon.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
@@ -175,14 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- FIM DA LIMPEZA ---
-    // Removemos toda a lógica de Inventário e Dashboard daqui
-    // para evitar conflitos com os scripts novos das páginas HTML.
+}); // FIM DO DOM CONTENT LOADED
 
-});
+// ============================================================
+// 5. FUNÇÕES GLOBAIS (FORA DO ESCOPO)
+// ============================================================
 
-// --- FUNÇÕES GLOBAIS DE ABRIR/FECHAR MODAL ---
-// Definidas fora do DOMContentLoaded para garantir acesso global
 window.openModal = (modalId) => {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -207,7 +212,7 @@ window.closeModal = (modalId) => {
     }
 };
 
-// Fechar modal ao clicar fora
+// Fechar modal ao clicar fora (Overlay)
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', function(e) {
         if (e.target === this) window.closeModal(this.id);

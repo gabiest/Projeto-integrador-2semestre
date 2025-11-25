@@ -1033,9 +1033,30 @@ body {
 }
 
 /* Inicializa elementos que usarão .animate-entrada como invisíveis (para que a animação funcione) */
-.insights > div, .kpi-card, .chart-card, .table-card, .recent-orders, .quick-actions, .dashboard-grid > div {
- opacity: 0; 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px); /* Começa 40px para baixo */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);    /* Termina no lugar certo */
+    }
 }
+
+/* 2. Aplica nos cartões (começam invisíveis) */
+.kpi-card, .chart-card {
+    opacity: 0; /* Começa invisível */
+    animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; /* Movimento elegante */
+}
+
+/* 3. Define o tempo de espera de cada um (Cascata) */
+.dashboard-grid > div:nth-child(1) { animation-delay: 0.1s; } /* Disp. Geral */
+.dashboard-grid > div:nth-child(2) { animation-delay: 0.2s; } /* Offline */
+.dashboard-grid > div:nth-child(3) { animation-delay: 0.3s; } /* Online */
+.dashboard-grid > div:nth-child(4) { animation-delay: 0.4s; } /* Gráfico Rosca */
+.dashboard-grid > div:nth-child(5) { animation-delay: 0.5s; } /* Gráfico Barra */ 
+
 
 /* Regra de transição do menu: Removemos o 'fixed' que estava conflitando na Home */
 /* Se o menu precisa ser fixo em todas as páginas, mantenha 'position: fixed' aqui. */

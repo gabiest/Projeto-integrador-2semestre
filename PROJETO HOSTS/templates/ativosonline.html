@@ -30,7 +30,6 @@
         <div class="page-header"> 
             <h1>Ativos Online</h1>
             <div class="botoes-header">
-                <!-- Apenas o botão Atualizar, conforme seu print -->
                 <button class="btn-add" id="refresh-btn" type="button" onclick="carregarAtivosOnline()">
                     <i class="bi bi-arrow-clockwise"></i> Atualizar
                 </button>
@@ -51,7 +50,7 @@
                         <th>NOME DO ATIVO</th>
                         <th>ENDEREÇO MAC</th> 
                         <th>IDENTIFICADOR (ID/IP)</th>
-                        <th>STATUS</th>
+                        <th style="text-align: center;">STATUS</th>
                     </tr>
                 </thead>
                 <tbody id="online-table-body">
@@ -63,7 +62,6 @@
 
     <script src="js/script.js"></script>
 
-    <!-- SCRIPT PARA BUSCAR DADOS REAIS DA API -->
     <script>
         // Rota específica para pegar apenas quem está ONLINE
         const API_URL = 'http://127.0.0.1:5000/api/ativos-online'; 
@@ -104,12 +102,13 @@
                 const tr = document.createElement('tr');
                 
                 // Monta a linha com as 4 colunas
+                // ALTERAÇÃO AQUI: Removido o ícone Wifi e adicionado text-align: center
                 tr.innerHTML = `
                     <td>${ativo.nome || 'Desconhecido'}</td>
                     <td>${ativo.mac_address || '-'}</td>
                     <td>${ativo.ip_address || '-'}</td>
-                    <td style="color: #28a745; font-weight: bold;">
-                        Online <i class="bi bi-wifi"></i>
+                    <td style="color: #28a745; font-weight: bold; text-align: center;">
+                        Online
                     </td>
                 `;
                 tbody.appendChild(tr);

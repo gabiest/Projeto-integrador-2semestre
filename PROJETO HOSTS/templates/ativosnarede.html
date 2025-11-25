@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hosts | Inventário de Ativos</title>
+    <link rel="icon" href="data:,">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,8 +32,7 @@
         <div class="page-header"> 
             <h1>Inventário de Ativos</h1>
             <div class="botoes-header">
-                <!-- Botão Adicionar chama a função de abrir modal limpo -->
-                <button class="btn-add" id="add-asset-btn" onclick="abrirModalCriacao()">
+                <button class="btn-add" id="add-asset-btn" onclick="abrirModalAdicionar()">
                     <i class="bi bi-plus-circle-fill"></i> Adicionar Novo Ativo
                 </button>
                 
@@ -57,7 +58,7 @@
                         <th>Identificador (ID/IP)</th>
                         <th>Status</th>
                         <th>Condição</th>
-                        <th>Ações</th> 
+                        <th>AÇÕES</th> 
                     </tr>
                 </thead>
                 <tbody id="inventory-table-body">
@@ -67,12 +68,10 @@
         </div>
     </main>
 
-    <!-- Modal para Adicionar/Editar Ativo -->
     <div class="modal-overlay" id="asset-modal">
         <div class="modal-content">
             <h2 id="modal-title">Adicionar Novo Ativo</h2>
             <form id="asset-form" onsubmit="salvarAtivo(event)">
-                <!-- Input escondido para guardar o ID quando for edição -->
                 <input type="hidden" id="assetIdDatabase"> 
                 
                 <div class="form-group">
@@ -87,8 +86,6 @@
                     <label for="assetId">Identificador (IP)</label>
                     <input type="text" id="assetId" required>
                 </div>
-                <!-- O campo Tipo não existia na sua tabela do banco, então removi ou deixei opcional -->
-                
                 <div class="form-group">
                     <label for="assetStatus">Status</label>
                     <select id="assetStatus">
@@ -96,14 +93,13 @@
                         <option value="Offline">Offline</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="display:none">
                     <label for="assetCondition">Condição</label>
                     <select id="assetCondition">
                         <option value="Disponível">Disponível</option>
-                        <option value="Alocado">Alocado</option>
-                        <option value="Manutenção">Manutenção</option>
                     </select>
                 </div>
+                
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="fecharModais()">Cancelar</button>
                     <button type="submit" class="btn-save">Salvar</button>
@@ -112,184 +108,19 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação para Excluir -->
     <div class="modal-overlay" id="delete-confirm-modal">
         <div class="modal-content confirmation">
              <h2>Confirmar Exclusão</h2>
              <p>Tem certeza que deseja excluir o ativo "<strong id="asset-name-to-delete"></strong>"?</p>
              <input type="hidden" id="delete-id-target">
-             <div class="modal-actions">
+             <div class="modal-actions" style="justify-content: center;">
                     <button type="button" class="btn-cancel" onclick="fecharModais()">Cancelar</button>
                     <button type="button" class="btn-confirm-delete" onclick="confirmarExclusao()">Excluir</button>
                 </div>
         </div>
     </div>
 
-    <!-- Script original para menu e outras funções visuais -->
-    <script src="js/script.js"></script>
+    <div id="toast-container"></div>
 
-    <!-- SCRIPT DE CONTROLE DOS ATIVOS (Front + Back) -->
-    <script>
-        // Variável Global para guardar os dados recebidos e facilitar a edição
-        let listaGlobalAtivos = [];
-
-        // URL da API Python
-        const API_BASE = 'http://127.0.0.1:5000/api/ativos'; 
-
-        // --- 1. FUNÇÕES DE LEITURA (GET) ---
-        function carregarDadosInventario() {
-            const tbody = document.getElementById('inventory-table-body');
-            const btn = document.getElementById('refresh-btn');
-            
-            if(btn) btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> ...';
-            
-            fetch(API_BASE)
-                .then(response => response.json())
-                .then(data => {
-                    listaGlobalAtivos = data; // Salva na memória para usar na edição
-                    preencherTabela(data);
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    tbody.innerHTML = '<tr><td colspan="6" style="color:red; text-align:center">Erro na conexão com Python.</td></tr>';
-                })
-                .finally(() => {
-                    if(btn) btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar';
-                });
-        }
-
-        function preencherTabela(dados) {
-            const tbody = document.getElementById('inventory-table-body');
-            tbody.innerHTML = ''; 
-
-            if (dados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Nenhum ativo encontrado.</td></tr>';
-                return;
-            }
-
-            dados.forEach(ativo => {
-                const tr = document.createElement('tr');
-                const cor = ativo.status === 'Online' ? 'green' : 'red';
-                
-                // AQUI ESTÁ O PULO DO GATO: Adicionei onclick direto nos botões
-                tr.innerHTML = `
-                    <td>${ativo.nome}</td>
-                    <td>${ativo.mac_address || '-'}</td>
-                    <td>${ativo.ip_address || '-'}</td>
-                    <td style="color: ${cor}; font-weight: bold;">${ativo.status}</td>
-                    <td>${ativo.condicao || '-'}</td>
-                    <td>
-                        <button class="btn-editar" onclick="prepararEdicao(${ativo.id})">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn-excluir" onclick="prepararExclusao(${ativo.id}, '${ativo.nome}')">
-                            <i class="bi bi-trash-fill"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- 2. FUNÇÕES DE MODAIS E EDIÇÃO ---
-
-        // Abre o modal vazio para criar novo
-        function abrirModalCriacao() {
-            document.getElementById('modal-title').innerText = "Adicionar Novo Ativo";
-            document.getElementById('assetIdDatabase').value = ""; // ID vazio = Novo
-            document.getElementById('asset-form').reset();
-            
-            // Mostra o modal (adiciona a classe 'active' que costuma ser usada em modais, ou display flex)
-            const modal = document.getElementById('asset-modal');
-            modal.style.display = 'flex'; 
-        }
-
-        // Abre o modal preenchido para editar
-        function prepararEdicao(id) {
-            // Busca o ativo na lista que guardamos na memória
-            const ativo = listaGlobalAtivos.find(a => a.id === id);
-            if (!ativo) return;
-
-            document.getElementById('modal-title').innerText = "Editar Ativo";
-            document.getElementById('assetIdDatabase').value = ativo.id; // ID preenchido = Edição
-            
-            // Preenche os campos
-            document.getElementById('assetName').value = ativo.nome;
-            document.getElementById('macAddress').value = ativo.mac_address;
-            document.getElementById('assetId').value = ativo.ip_address;
-            document.getElementById('assetStatus').value = ativo.status;
-            document.getElementById('assetCondition').value = ativo.condicao;
-
-            document.getElementById('asset-modal').style.display = 'flex';
-        }
-
-        // Abre o modal de confirmação de exclusão
-        function prepararExclusao(id, nome) {
-            document.getElementById('asset-name-to-delete').innerText = nome;
-            document.getElementById('delete-id-target').value = id;
-            document.getElementById('delete-confirm-modal').style.display = 'flex';
-        }
-
-        function fecharModais() {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-        }
-
-        // --- 3. FUNÇÕES DE GRAVAÇÃO (POST/PUT/DELETE) ---
-
-        // Salvar (Criar ou Editar)
-        function salvarAtivo(event) {
-            event.preventDefault(); // Não recarrega a página
-            
-            const id = document.getElementById('assetIdDatabase').value;
-            const dados = {
-                nome: document.getElementById('assetName').value,
-                mac_address: document.getElementById('macAddress').value,
-                ip_address: document.getElementById('assetId').value,
-                status: document.getElementById('assetStatus').value,
-                condicao: document.getElementById('assetCondition').value
-            };
-
-            let url = API_BASE;
-            let metodo = 'POST';
-
-            // Se tem ID, é edição (PUT)
-            if (id) {
-                url = `${API_BASE}/${id}`;
-                metodo = 'PUT';
-            }
-
-            fetch(url, {
-                method: metodo,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(dados)
-            })
-            .then(res => res.json())
-            .then(() => {
-                fecharModais();
-                carregarDadosInventario(); // Atualiza a tabela
-                alert(id ? 'Ativo atualizado!' : 'Ativo criado!');
-            })
-            .catch(err => alert('Erro ao salvar: ' + err));
-        }
-
-        // Excluir
-        function confirmarExclusao() {
-            const id = document.getElementById('delete-id-target').value;
-            
-            fetch(`${API_BASE}/${id}`, {
-                method: 'DELETE'
-            })
-            .then(res => res.json())
-            .then(() => {
-                fecharModais();
-                carregarDadosInventario(); // Atualiza a tabela
-                alert('Ativo excluído!');
-            })
-            .catch(err => alert('Erro ao excluir: ' + err));
-        }
-
-        // Inicializa ao carregar a página
-        document.addEventListener('DOMContentLoaded', carregarDadosInventario);
-    </script>
-</body>
+    <script src="js/script.js"></script>     <script src="js/inventario.js"></script> </body>
 </html>
