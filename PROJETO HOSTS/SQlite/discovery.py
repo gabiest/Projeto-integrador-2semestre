@@ -10,7 +10,7 @@ from getmac import get_mac_address
 # --- Configurações CRÍTICAS ---
 DB_FILE = 'meu_banco.db' 
 # ATUALIZADO PARA A REDE DO SENAC:
-TARGET_NETWORK = '192.168.56.0/24'  # Rede alvo para o scan
+TARGET_NETWORK = '192.168.15.0/24'  # Rede alvo para o scan
 # ------------------------------
 
 def conectar():
