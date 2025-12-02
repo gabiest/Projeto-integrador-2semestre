@@ -1,0 +1,2861 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap');
+
+/* Variáveis de Cor do Tema "Hosts" */
+:root {
+    --text-color: #f7f3f3;
+    --primary-color: #a788d9;
+    --secondary-color: #8c76ad;
+    --terciary-color: #382faa;
+    --quarto-color: #9039d4;
+    --quinto-color: #5433b8;
+    --sexto-color: #7236c6;
+    --oitavo-color: #442875;
+    --danger-color: #ff7782;
+    --warning-color: #ffbb55;
+    --success-color: #41f1b6;
+    --duvidosa-color: #363949;
+    
+    /* Variáveis de Cor ATUALIZADAS para Tema Claro com Gradientes Roxos */
+
+    --text-primary-light: #f7f3f3; /* Texto principal claro (para dentro dos cartões roxos) */
+    --text-secondary-light: #c0c0c0; /* Texto secundário cinza claro (para dentro dos cartões roxos) */
+    --text-primary-dark: #363949; /* Texto principal escuro (para o corpo claro) */
+    --text-secondary-dark: #677483; /* Texto secundário cinza escuro (para o corpo claro) */
+
+    --bg-light-main: #f6f6f9; /* Fundo principal da página (claro) */
+    --bg-menu-dark: #23233a; /* Fundo do menu lateral (escuro) */
+
+    /* Gradientes para os cartões (tons de roxo/magenta) */
+    --gradient-card-start: #7236c6;   /* Roxo escuro */
+    --gradient-card-end: #a788d9;     /* Roxo mais claro */
+    --gradient-danger-start: #e23e57; /* Vermelho mais forte para alerta */
+    --gradient-danger-end: #ff7782;   /* Vermelho mais suave */
+    --gradient-success-start: #20b2aa; /* Azul esverdeado para sucesso */
+    --gradient-success-end: #41f1b6;   /* Verde água */
+
+    /* Cores diretas para elementos específicos */
+    --danger-color: #ff7782;
+    --warning-color: #ffbb55;
+    --success-color: #41f1b6;
+    --info-blue: #00BFFF; /* Azul para deltas */
+
+    --border-color-dark: #3a3a5a; /* Borda escura para menu/elementos internos escuros */
+    --shadow-dark: rgba(0, 0, 0, 0.3); /* Sombra mais escura */
+    --shadow-light: rgba(132, 139, 200, 0.15); /* Sombra para o corpo claro */
+
+    
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f6f6f9;
+    font-family: "Arimo", sans-serif;
+    transition: background-color 0.5s ease;
+    color: #363949;
+}
+
+/* Botão do Menu */
+.botao-menu {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 60;
+    background: linear-gradient(to right, var(--sexto-color), var(--quarto-color));
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--text-color);
+    transition: all 0.5s ease-in-out;
+}
+
+.botao-menu:hover {
+    background: linear-gradient(to right, var(--quinto-color), var(--sexto-color));
+}
+
+.botao-menu.ativo {
+    left: 320px;
+    transform: rotate(360deg);
+}
+
+/* Menu Lateral */
+.menu-lateral {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100%;
+    z-index: 5;
+    background: linear-gradient(to bottom, var(--quarto-color), var(--terciary-color));
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.menu-lateral.ativo {
+    left: 0;
+}
+
+.conta-item {
+    margin-top: 10px;
+    margin-bottom: 120px;
+    padding: 25px 30px;
+    transition: background-color 0.3s ease;
+}
+
+.conta-item:hover {
+    background-color: var(--sexto-color);
+}
+
+.conta-item a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.conta-item a i {
+    font-size: 60px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.menu-lateral ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu-lateral ul li {
+    padding: 25px 30px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-lateral ul li.active,
+.menu-lateral ul li:hover {
+    background-color: var(--sexto-color);
+}
+
+.menu-lateral ul li a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-lateral ul li a i {
+    font-size: 30px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.menu-lateral ul li a:hover i {
+    transform: translateX(5px) rotate(5deg);
+}
+
+/* Conteúdo Principal */
+.conteudo {
+    margin-left: 60px;
+    padding: 40px;
+    color: var(--oitavo-color);
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: translateX(300px);
+}
+
+
+
+.conteudo h1 {
+    font-size: 2rem;
+    color: var(--oitavo-color);
+}
+.conteudo p {
+    color: #677483;
+    margin-bottom: 2rem;
+}
+
+/* Fundo de Sobreposição */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 4;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.5s ease;
+}
+
+.background.ativo {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Item de Logout */
+.logout-item {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.logout-item:hover {
+    background-color: var(--quinto-color);
+}
+
+.logout-item a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 25px 30px;
+}
+
+/* Cartões de Insights Personalizados */
+.insights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.6rem;
+}
+
+.insights > div {
+    padding: 1.8rem;
+    border-radius: 2rem;
+    margin-top: 1rem;
+    box-shadow: 0 1rem 2rem rgba(132, 139, 200, 0.18);
+    transition: all 300ms ease;
+    color: var(--text-color);
+    background: linear-gradient(to right, var(--sexto-color), var(--quarto-color));
+}
+
+.insights > div:hover {
+    box-shadow: none;
+}
+
+.insights > div i {
+    font-size: 2.5rem;
+}
+
+.insights > div .middle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.insights h3 {
+    margin: 1rem 0 0.6rem;
+    font-size: 1rem;
+}
+
+.insights .progress {
+    position: relative;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+}
+
+.insights svg {
+    width: 7rem;
+    height: 7rem;
+}
+
+.insights svg circle {
+    fill: none;
+    stroke: var(--text-color);
+    stroke-width: 14;
+    stroke-linecap: round;
+    transform: translate(5px, 5px);
+    opacity: 0.6;
+}
+
+.insights .sales svg circle { stroke-dasharray: 200; stroke-dashoffset: 0; } /* 100% */
+.insights .expenses svg circle { stroke-dasharray: 200; stroke-dashoffset: 80; } /* 60% */
+.insights .income svg circle { stroke-dasharray: 200; stroke-dashoffset: 190; } /* 5% */
+
+.insights .progress .number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.insights small {
+    display: block;
+    margin-top: 1.3rem;
+}
+
+
+/* Tabela de Pedidos Recentes */
+.recent-orders {
+    margin-top: 2rem;
+}
+
+.recent-orders h2 {
+    margin-bottom: 0.8rem;
+}
+
+.recent-orders table:hover {
+    box-shadow: none;
+}
+
+.recent-orders table tbody td {
+    height: 2.8rem;
+    border-bottom: 1px solid rgba(132, 139, 200, 0.18);
+    color: #677483;
+}
+
+.recent-orders table tbody tr:last-child td {
+    border: none;
+}
+
+.recent-orders a {
+    text-align: center;
+    display: block;
+    margin: 1rem auto;
+    color: var(--sexto-color);
+}
+
+.danger { color: var(--danger-color); }
+.warning { color: var(--warning-color); }
+.success { color: var(--success-color); }
+
+/* Responsividade */
+@media screen and (max-width: 1200px) {
+    .insights {
+        grid-template-columns: 1fr;
+        gap: 1.6rem;
+    }
+}
+@media screen and (max-width: 768px) {
+    .insights {
+        grid-template-columns: 1fr;
+    }
+    .recent-orders {
+        position: relative;
+        margin: 3rem 0 0 0;
+        width: 100%;
+    }
+    .recent-orders table {
+        width: 100%;
+        margin: 0;
+    }
+    .conteudo {
+        margin-left: 20px;
+        padding: 20px;
+    }
+    .conteudo.ativo {
+        margin-left: 320px;
+    }
+}
+
+
+
+.insights > div h1, /*Para alteração de número nos ativos*/
+.insights > div h2,
+.insights > div h3,
+.insights > div p,
+.insights > div span {
+    color: #ffffff; 
+}
+
+.insights .progress .number {
+    position: absolute;
+    top: 65%;
+    left: 48%;
+    transform: translate(-50%, -50%); /* centraliza perfeitamente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff; /* cor do texto da porcentagem */
+    font-weight: bold;
+}
+
+/* ... seu código CSS existente termina aqui ... */
+
+/* --- NOVOS ESTILOS PARA INVENTÁRIO --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(to right, var(--secondary-purple), var(--primary-purple));
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-add:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(144, 57, 212, 0.4);
+}
+
+.search-container {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3.5rem;
+    border-radius: 10px;
+    background-color: var(--bg-light);
+    border: 1px solid var(--bg-card);
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+}
+.search-container input:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(144, 57, 212, 0.3);
+}
+
+.search-container i {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.action-icons i {
+    font-size: 1.3rem;
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: color 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.action-icons .bi-pencil-square:hover { color: var(--accent-blue); }
+.action-icons .bi-trash:hover { color: var(--danger-color); }
+
+/* Estilos do Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--bg-light);
+    padding: 2.5rem;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px var(--shadow);
+    border: 1px solid var(--bg-card);
+}
+
+.modal-content h2 {
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--bg-card);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.btn-cancel {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--text-secondary);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-cancel:hover {
+    background-color: var(--bg-card);
+}
+
+.btn-save {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-purple);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.btn-save:hover {
+    background: var(--secondary-purple);
+}
+
+.home-summary.insights > .card {
+    color: var(--oitavo-color);
+    background: #fff; /* Fundo branco para os cartões da home */
+    transition: all 0.3s ease;
+}
+
+.home-summary.insights > .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(132, 139, 200, 0.3);
+}
+
+.home-summary.insights > .card .middle {
+    justify-content: flex-start;
+    gap: 1rem;
+}
+
+.quick-actions {
+    margin-top: 3rem;
+}
+
+.quick-actions h2 {
+    margin-bottom: 1rem;
+    color: var(--oitavo-color);
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 1rem 2rem rgba(132, 139, 200, 0.18);
+    text-decoration: none;
+    color: var(--oitavo-color);
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: var(--sexto-color);
+    color: var(--text-color);
+    transform: translateY(-5px);
+}
+
+.action-btn i {
+    font-size: 2rem;
+    padding: 0.5rem;
+    background: linear-gradient(to right, var(--sexto-color), var(--quarto-color));
+    color: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover i {
+    background: #fff;
+    color: var(--sexto-color);
+}
+
+.action-btn span {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* --- INCLUA E SUBSTITUA A PARTIR DAQUI --- */
+.table-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px var(--shadow);
+}
+
+.chart-card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px var(--shadow);
+    height: 380px; /* <- ESTA É A LINHA QUE CORRIGE O TAMANHO */
+    display: flex;
+    flex-direction: column;
+}
+/* --- ATÉ AQUI --- */
+
+/*CONFIGURAÇÕES*/
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* --- INCLUA E SUBSTITUA A PARTIR DAQUI --- */
+
+.insights-grid {
+    display: grid;
+    /* Cria uma grelha flexível com 3 colunas */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.5rem;
+}
+
+.card-performance {
+    /* Faz o gráfico de performance ocupar 2 colunas */
+    grid-column: span 2; 
+}
+
+.card-status {
+    /* Faz o gráfico de status ocupar 1 coluna */
+    grid-column: span 1; 
+}
+
+.card-kpi {
+    /* Faz o cartão de KPI ocupar 1 coluna */
+    grid-column: span 1; 
+}
+
+.table-card {
+    /* Faz a tabela ocupar 2 colunas */
+    grid-column: span 2; 
+}
+
+.card-asset-type {
+    /* Faz o gráfico de tipos de ativo ocupar as 3 colunas (largura total) */
+    grid-column: span 3;
+}
+
+/* --- ATÉ AQUI --- */
+
+
+/*CONFIGURAÇÕES*/
+
+/* ======================================================= */
+/* ====== ESTILOS DA TELA DE CONFIGURAÇÕES (REVISADOS) ===== */
+/* ======================================================= */
+
+/* --- AJUSTES NO CONTEÚDO PRINCIPAL (Mantenha este padding se não houver wrapper) --- */
+.conteudo {
+    /* Mantido o padding padrão. Se você usar o wrapper, o padding deve ir para ele. */
+    padding: 40px; 
+    z-index: 1;
+    color: var(--oitavo-color); 
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* --- WRAPPER PARA CENTRALIZAÇÃO E LARGURA (Se você usou o HTML que te passei) --- */
+.configuracoes-wrapper {
+    max-width: 900px; /* Limita a largura para centralizar (esticado, mas controlado) */
+    margin-left: auto;
+    margin-right: auto; /* Centraliza horizontalmente */
+    width: 100%;
+}
+
+
+/* --- ESTILOS GERAIS DE CONTEÚDO --- */
+.titulo-secao {
+    max-width: 900px; /* Garante alinhamento com o bloco centralizado */
+    margin-left: auto;
+    margin-right: auto;
+    
+    font-size: 1.2em;
+    color: var(--quarto-color); 
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 15px; 
+}
+
+
+/* --- CARTÃO DE PERFIL (Roxo) --- */
+.cartao-perfil {
+    max-width: 900px; 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    
+    /* Visuais */
+    background: linear-gradient(135deg, #8a2be2 0%, #6a1b9a 100%);
+    color: #fff;
+    border-radius: 2.5rem; /* Borda mais redonda */
+    padding: 25px 30px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    cursor: default;
+    
+    /* ANIMAÇÃO */
+    transition: all 0.3s ease; 
+}
+.cartao-perfil:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px); /* Efeito de levantar */
+}
+
+/* Ícone de Perfil Redondo */
+.profile-image-placeholder {
+    margin-right: 25px; 
+    height: 70px; 
+    width: 70px;
+    border-radius: 50%; /* Torna o placeholder circular */
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+}
+.profile-image-placeholder .bi-person-circle {
+    font-size: 3.5em; 
+    color: #fff;
+    line-height: 1;
+}
+.cartao-perfil .perfil-info {
+    display: flex;
+    align-items: center;
+}
+.cartao-perfil .perfil-info span {
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+
+/* --- LISTAS DE CONFIGURAÇÕES (Brancas) --- */
+.configuracoes-lista {
+    max-width: 900px; /* Centraliza e limita a largura */
+    margin-left: auto;
+    margin-right: auto;
+    
+    background-color: #ffffff;
+    border-radius: 2.5rem; /* Borda mais redonda */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    overflow: hidden; /* Garante que o conteúdo interno respeite o border-radius */
+}
+
+.configuracao-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    /* Padding para esticar e dar espaço */
+    padding: 20px 30px; 
+    
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    text-decoration: none;
+    
+    /* ANIMAÇÃO */
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+/* Efeito de HOVER nos itens da lista */
+.configuracao-item:hover {
+    background-color: #f7f7f7; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    transform: translateY(-1px);
+}
+
+/* Garante que o último item não tenha borda inferior, mas arredonde os cantos */
+.configuracoes-lista .configuracao-item:last-child {
+    border-bottom: none;
+}
+
+/* Estilos de Ícones dentro do item */
+.icone-nome {
+    display: flex;
+    align-items: center;
+}
+.icone-nome i {
+    font-size: 1.4em;
+    margin-right: 25px; /* Mais espaço horizontal */
+    color: var(--quarto-color); 
+}
+
+/* Estilos para o detalhe e seta */
+.detalhe-seta {
+    display: flex;
+    align-items: center;
+    color: #777;
+}
+.detalhe-seta .detalhe {
+    margin-right: 10px;
+}
+.detalhe-seta i {
+    font-size: 0.9em;
+}
+
+
+/* --- REGRAS DO SWITCH TOGGLE (Se você decidir usar no futuro) --- */
+/* Mantenha o código do Switch Toggle aqui se ele já estiver no seu style.css */
+
+.sobre-nos-container {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr; /* Coluna da imagem um pouco menor */
+    gap: 3rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 2rem;
+    box-shadow: 0 1rem 2rem rgba(132, 139, 200, 0.18);
+}
+
+.sobre-nos-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 1.5rem;
+}
+
+.sobre-nos-valores h1 {
+    font-size: 2.5rem;
+    color: var(--oitavo-color);
+    margin-bottom: 0.5rem;
+}
+
+.sobre-nos-valores > p {
+    font-size: 1.1rem;
+    color: #677483;
+    margin-bottom: 2.5rem;
+}
+
+.lista-valores {
+    list-style: none;
+    padding: 0;
+}
+
+.lista-valores li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.lista-valores li:last-child {
+    margin-bottom: 0;
+}
+
+.lista-valores i {
+    font-size: 2rem;
+    color: var(--sexto-color);
+    padding-top: 5px;
+}
+
+.valor-texto h3 {
+    font-size: 1.3rem;
+    color: #363949;
+    margin-bottom: 0.3rem;
+}
+
+.valor-texto p {
+    color: #677483;
+    line-height: 1.6;
+}
+
+/* Responsividade para a página Sobre Nós */
+@media screen and (max-width: 992px) {
+    .sobre-nos-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+
+/* Container principal do banner */
+.hero {  
+ display: flex;
+ align-items: center;
+ width: 90%; /* Ajusta a largura total */ 
+ max-width: 1300px; /* Limita a largura máxima */
+ z-index: 2;
+ position: relative;
+}
+
+/* Lado esquerdo (texto e botão) */
+.hero-left {
+ flex: 1; /* Ocupa o espaço disponível */
+ padding-right: 4rem; /* Espaço entre texto e imagem */
+ color: var(--text-color);
+}
+
+.hero-title {
+ font-size: 4.5rem; /* Tamanho grande */
+ font-weight: 700; 
+ margin-bottom: 1rem;
+ color: var(--text-color);
+}
+
+.hero-sub {
+ font-size: 1.2rem;
+ line-height: 1.7;
+ margin-bottom: 2.5rem;
+ color: var(--text-color);
+ opacity: 0.9;
+}
+
+.hero-cta {
+ display: inline-block;
+ padding: 1rem 3rem;
+ background-color: #fff;
+ color: var(--sexto-color);
+ border-radius: 50px;
+ text-decoration: none;
+ font-size: 1.1rem;
+ font-weight: 600;
+ transition: all 0.3s ease;
+ box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.hero-cta:hover {
+ background-color: var(--primary-color);
+ color: #8a2be2;
+ transform: translateY(-3px);
+ box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* Lado direito (imagem circular) */
+.hero-right {
+ flex: 1;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+}
+
+.circle-image {
+ position: relative;
+ width: 800px; /* Tamanho do círculo */
+ height: 800px;
+ border-radius: 50%;
+ overflow: hidden; /* Corta a imagem para ficar circular */
+ background-image: url('../imagens/logo_hosts (1).png'); /* <<< AJUSTE O CAMINHO DA IMAGEM */
+ background-size: cover; 
+ background-position: 80% center;
+ position: absolute; /* Mude para absolute */
+ right: 188px; /* Encosta ele na direita do pai relativo */
+ top: 50%;  /* Pode ajustar o top conforme necessário */
+ transform: translateY(-50%);
+}
+
+
+/* --- Fundo de Sobreposição (Cinza/Fade) --- */
+.background {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background-color: rgba(0, 0, 0, 0.5); /* CINZA */
+ z-index: 40; 
+ visibility: hidden;
+ opacity: 0;
+ transition: all 0.5s ease; /* A animação de fade */
+}
+
+.background.ativo {
+ visibility: visible;
+ opacity: 1;
+}
+
+
+
+/* --- ANIMAÇÃO DE ENTRADA PARA CONTEÚDO INTERNO --- */
+@keyframes fadeInUp {
+ from {
+ opacity: 0;
+ transform: translateY(20px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
+}
+
+.animate-entrada {
+ animation-name: fadeInUp;  
+ animation-duration: 0.6s; 
+ animation-timing-function: ease-out;
+ animation-fill-mode: forwards; 
+ opacity: 0; 
+}
+
+/* Inicializa elementos que usarão .animate-entrada como invisíveis (para que a animação funcione) */
+.insights > div, .kpi-card, .chart-card, .table-card, .recent-orders, .quick-actions, .dashboard-grid > div {
+ opacity: 0; 
+}
+
+/* Regra de transição do menu: Removemos o 'fixed' que estava conflitando na Home */
+/* Se o menu precisa ser fixo em todas as páginas, mantenha 'position: fixed' aqui. */
+.menu-lateral {
+ position: fixed; /* Mantido, pois você disse que o menu existe e anima */
+ top: 0;
+ left: -300px;
+ width: 300px;
+ height: 100%;
+ z-index: 50;
+ background: linear-gradient(to bottom, var(--quarto-color), var(--terciary-color));
+ box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+ transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* Remoção da regra de fixed que estava SÓ na Home (se ela estiver no seu código, ela deve ser removida ou sobrescrita, pois estava causando problemas de fixação/posição). A regra do menu lateral deve ser a principal. */
+/* Não incluí a regra da Home novamente para evitar o 'fixed' indesejado. */
+
+/* Garante que o conteúdo principal das páginas internas (não Home) se mova ao abrir o menu */
+.conteudo.ativo {
+transform: translateX(300px);
+}
+
+/* Garante que na Home, o conteúdo interno fique escondido, como antes */
+body:has(main.welcome-screen) .conteudo,
+body:has(main.welcome-screen) section.home {
+ display: none !important;
+}
+
+/* Inicializa elementos que usarão .animate-entrada como invisíveis */
+.insights > div, .kpi-card, .chart-card, .table-card, .recent-orders, .quick-actions, .dashboard-grid > div {
+ opacity: 0; 
+}
+/* Ajustes Responsivos */
+@media screen and (max-width: 992px) {
+ .hero {
+  flex-direction: column-reverse; /* Imagem vai para cima em telas menores */
+  text-align: center;
+  width: 100%;
+  padding: 40px 20px;
+ }
+ .hero-left {
+  padding-right: 0;
+ }
+ .circle-image {
+  width: 300px;
+  height: 300px;
+  margin-bottom: 2rem;
+ }
+ .hero-title {
+  font-size: 3rem;
+ }
+ .hero-sub {
+  font-size: 1rem;
+ }
+}
+
+
+/* Oculta o conteúdo padrão (section.home) quando a home de boas-vindas está ativa */
+body:has(main.welcome-screen) .conteudo,
+body:has(main.welcome-screen) section.home {
+ display: none !important;
+}
+
+/* --- FUNDO DEGRADÊ ROXO --- */
+body.home-page {
+ background: linear-gradient(135deg, #6a0dad 0%, #8a2be2 50%, #c77dff 100%);
+ height: 100vh; 
+ overflow: hidden; 
+}
+
+/* Container principal do banner */
+.hero { 
+ display: flex;
+ /* ... restante do seu código CSS ... */
+}
+body:has(main.welcome-screen) {
+  background-image: url('../imagens/bebeca01.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ======================================================= */
+/* === CORREÇÃO DA LOGO-TOP-LEFT PARA MOVER COM A TELA === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Reseta a posição da logo e a torna parte da página */
+.logo-top-left {
+    position: relative; /* Remove o 'fixed' */
+    width: 250px; /* Define um tamanho novo (ajuste se quiser) */
+    height: auto;
+    
+    /* Reseta todas as regras de 'fixed' */
+    top: auto;
+    left: auto;
+    z-index: auto;
+    
+    /* Reseta a animação que não é mais necessária */
+    opacity: 1;
+    transform: none;
+    animation: none;
+
+    /* Adiciona espaço abaixo da logo */
+    margin-bottom: 1.5rem; 
+}
+
+/* 2. Em telas pequenas, ajusta a logo */
+@media (max-width: 992px) {
+    .logo-top-left {
+        width: 200px;
+        /* O text-align: center no .hero já vai centralizar ela */
+    }
+}
+  /* --- ENTRADA DAS LETRAS (TÍTULO E SUBTÍTULO) --- */
+.hero-title, .hero-sub {
+  opacity: 0;
+  transform: translateX(-50px); /* Vem da esquerda */
+  animation: slideLeft 1s forwards;
+}
+
+.hero-title {
+  animation-delay: 0.3s;
+}
+
+.hero-sub {
+  animation-delay: 0.6s;
+}
+
+/* --- LOGO --- */
+.logo-top-left {
+  opacity: 0;
+  transform: translateX(-50px) scale(0.5); /* Vem da esquerda com leve zoom */
+  animation: slideLogo 1s forwards;
+  animation-delay: 0.3s; /* Sincroniza com o título */
+}
+
+
+/* --- KEYFRAMES --- */
+@keyframes slideLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideLogo {
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes slideRight {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+/* RESPONSIVO */
+@media screen and (max-width: 992px) {
+  .hero-title, .hero-sub, .logo-top-left {
+    transform: translateX(-30px);
+  }
+  .circle-image {
+    transform: translateX(30px);
+  }
+}
+
+
+/* --- INCLUA E SUBSTITUA A PARTIR DAQUI --- */
+
+/* Estilos dos Gráficos com Flexbox (Versão Final) */
+.charts-container {
+    display: flex;      /* Usa Flexbox para alinhar os itens */
+    flex-wrap: wrap;    /* Permite que os itens quebrem para a linha seguinte */
+    gap: 1.6rem;        /* Espaçamento entre os gráficos */
+    margin-top: 2rem;
+    align-items: flex-start; /* Alinha os itens no topo */
+}
+
+
+/* Define a largura base dos dois primeiros gráficos */
+.charts-container > .chart-card:nth-child(1) {
+    /* Ocupa aproximadamente 60% do espaço, menos o gap */
+    flex-basis: calc(60% - 0.8rem); 
+}
+.charts-container > .chart-card:nth-child(2) {
+     /* Ocupa aproximadamente 40% do espaço, menos o gap */
+    flex-basis: calc(40% - 0.8rem);
+}
+
+/* O terceiro gráfico (com a classe .large) ocupa a linha inteira */
+.chart-card.large {
+    flex-basis: 100%; /* Força a ocupar a largura total na linha seguinte */
+}
+
+.chart-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--oitavo-color);
+}
+
+/* --- ATÉ AQUI --- */
+
+/* --- NOVOS ESTILOS PARA DASHBOARD ELABORADO --- */
+
+/* Nova Grelha do Dashboard */
+/* Nova Grelha do Dashboard */
+.dashboard-grid {
+    display: grid;
+    /* 3 colunas, como no original */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.5rem;
+    margin-top: 1rem;
+    
+    /* --- CORREÇÃO DE ALTURA --- */
+    flex-grow: 1; /* Faz a grid esticar */
+    /* Define 2 linhas: 1ª para KPIs (altura auto), 2ª para Gráficos (esticada) */
+    grid-template-rows: auto 1fr; 
+}
+
+/* Cartões KPI */
+.kpi-card {
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color));; /* Fundo branco */
+    padding: 1.5rem;
+    border-radius: 1.5rem; /* Bordas mais suaves */
+    box-shadow: 0 8px 16px rgb(255, 255, 255); /* Sombra mais suave */
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgb(255, 255, 255);
+}
+
+.kpi-icon {
+    font-size: 2.2rem; /* Ícone um pouco maior */
+    padding: 1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(251, 255, 0, 0.137); /* Fundo roxo claro */
+    color: var(--warning-color); /* Ícone roxo */
+}
+.card-alerts .kpi-icon { background-color: rgba(255, 119, 130, 0.1); color: var(--danger-color); }
+.card-availability .kpi-icon { background-color: rgba(65, 241, 182, 0.1); color: var(--success-color); }
+
+
+.kpi-info span { display: block; }
+.kpi-title { color: #ffffff; font-size: 0.9rem; margin-bottom: 0.3rem;}
+.kpi-value { font-size: 1.8rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem;}
+.kpi-delta { font-size: 0.8rem; font-weight: 500;}
+/* Cores específicas para deltas (usando as variáveis já existentes) */
+.kpi-delta.success { color: var(--success-color); }
+.kpi-delta.danger { color: var(--danger-color); }
+.kpi-delta.info-blue { color: var(--warning-color); } /* Usa azul ou fallback */
+
+
+/* Cartões de Gráficos e Tabela */
+.chart-card, .table-card {
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color));;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 16px rgb(255, 255, 255);
+}
+
+.chart-card h2, .table-card h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: #fff;
+    font-weight: 600; /* Título mais forte */
+}
+
+/* --- POSICIONAMENTO NA GRELHA (AJUSTADO) --- */
+
+/* Os 3 KPIs no topo continuam ocupando 1 coluna cada (total 3) */
+
+/* Faz o gráfico de Status ocupar 1 coluna */
+.card-status { 
+    grid-column: span 1; 
+} 
+
+/* Faz o gráfico de Tipos de Ativos ocupar 2 colunas */
+.card-asset-type { 
+    grid-column: span 2; 
+}
+
+/* Ajusta altura dos canvas */
+.chart-card canvas {
+    max-height: 250px; 
+}
+
+/* Tabela */
+.table-card table {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaços entre células */
+}
+.table-card th {
+    text-align: left;
+    color: #ffffff;
+    padding-bottom: 0.8rem; /* Menos padding */
+    border-bottom: 1px solid #eee; /* Borda mais clara */
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.table-card td {
+    padding: 0.8rem 0; /* Menos padding vertical */
+    border-bottom: 1px solid #eee;
+    color: #ffffff; /* Texto mais escuro */
+    font-size: 0.9rem;
+}
+.table-card tr:last-child td { border-bottom: none; }
+
+/* Destaca números na tabela */
+.table-card td:nth-child(2),
+.table-card td:nth-child(3) {
+    font-weight: 500;
+}
+
+/* Responsividade Adicional */
+@media screen and (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr); 
+    }
+    .card-performance, .card-status, .card-top-assets, .card-asset-type {
+        grid-column: span 1; 
+    }
+     .card-top-assets {
+        grid-column: span 2; 
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr; 
+    }
+     .card-performance, .card-status, .card-top-assets, .card-asset-type {
+        grid-column: span 1; 
+    }
+    .kpi-card { flex-direction: column; text-align: center; gap: 0.5rem;} 
+}
+/* --- ANIMAÇÃO DE ENTRADA PARA OS CARTÕES --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-entrada {
+    animation-name: fadeInUp;           
+    animation-duration: 0.6s;         
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;    
+    opacity: 0;                       
+}
+
+/* Garante estado inicial correto */
+.kpi-card, .chart-card, .table-card {
+     opacity: 0; /* Começa invisível para animação */
+     /* Mantenha outros estilos, mas garanta a opacidade inicial */
+}
+.kpi-card:hover, .chart-card:hover, .table-card:hover { 
+    transform: translateY(-5px); /* Levanta um pouco mais */
+    box-shadow: 0 12px 25px var(--shadow-dark); /* Sombra mais acentuada */
+}
+
+/* Adicione transições suaves a todos os cartões (se ainda não tiver) */
+.kpi-card, .chart-card, .table-card {
+    /* ... seus estilos existentes ... */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Adiciona transição suave */
+    opacity: 0; /* Necessário para a animação de entrada */
+}
+
+/* --- ESTILOS ADICIONAIS E REFINADOS PARA INVENTÁRIO (TEMA ESCURO) --- */
+
+/* Ajusta o título principal da página */
+.conteudo h1 {
+    font-size: 2rem; /* Um pouco menor que o dashboard */
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+.conteudo p { /* Parágrafo descritivo */
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+/* Cabeçalho da Página (Título + Botão Adicionar) */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--text-color); /* Linha subtil abaixo */
+    padding-bottom: 1rem;
+}
+
+/* Botão Adicionar Novo Ativo (com gradiente) */
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* Mais espaço */
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color)); /* Gradiente roxo */
+    color: var(--text-color);
+    font-family: 'Arimo', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-add:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(114, 54, 198, 0.4); /* Sombra roxa no hover */
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color)); /* Inverte gradiente */
+}
+.btn-add i { font-size: 1.2rem; }
+
+/* Barra de Pesquisa Estilizada */
+.search-container {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3.5rem; /* Padding esquerdo para ícone */
+    border-radius: 10px;
+    background-color: var(#fff); /* Fundo dos cartões */
+    border: 1px solid var(--text-color);
+    font-family: 'Arimo', sans-serif;
+    color: var(--text-primary); /* Texto branco */
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.search-container input:focus {
+    border-color: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color)); /* Borda roxa clara */
+    box-shadow: 0 0 0 3px rgba(167, 136, 217, 0.2); /* Sombra roxa suave */
+}
+.search-container input::placeholder {
+    color: var(--text-secondary); /* Placeholder cinza claro */
+}
+
+.search-container i {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+/* Wrapper da Tabela */
+.table-wrapper {
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color));/* Fundo escuro */
+    border-radius: 1rem;
+    padding: 1.5rem; /* Padding interno */
+    box-shadow: 0 5px 15px var(--shadow);
+    border: 1px solid var(--border-color);
+    font-family: 'Arimo', sans-serif;
+    margin-top: 2rem;
+    overflow-x: auto;
+}
+
+/* Tabela de Inventário (Tema Escuro) */
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px; /* Largura mínima */
+}
+
+.inventory-table thead th {
+    color: var(--text-secondary);
+    font-weight: 500; /* Mais leve */
+    text-align: left;
+    font-family: 'Arimo', sans-serif;
+    padding: 0.8rem 1rem; /* Padding ajustado */
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem; /* Levemente menor */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.inventory-table tbody td {
+    color: var(--text-secondary); /* Texto padrão cinza claro */
+    padding: 1rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.inventory-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Primeira coluna (Nome) com destaque */
+.inventory-table td:first-child {
+    color: var(--text-primary); /* Branco */
+    font-weight: 500;
+}
+
+/* Coluna de Ações */
+.inventory-table td:last-child {
+     text-align: right;
+}
+
+.action-icons i {
+    font-size: 1.2rem; /* Ícones um pouco menores */
+    cursor: pointer;
+    margin: 0 0.5rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+    color: var(--text-secondary);
+}
+.action-icons i:hover {
+    transform: scale(1.15); /* Aumenta um pouco mais */
+}
+.action-icons .bi-pencil-square:hover { color: var(--success-color); }
+.action-icons .bi-trash:hover { color: var(--danger-color); }
+
+/* Linhas alternadas sutis (opcional) */
+.inventory-table tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02); /* Quase imperceptível */
+}
+
+.inventory-table tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.04); /* Destaque hover mais sutil */
+    color: var(--text-primary); /* Texto fica branco no hover */
+}
+
+
+/* Modal de Confirmação (Tema Escuro) */
+.modal-content.confirmation {
+    text-align: center;
+    background: var(--bg-light); /* Fundo escuro */
+    border: 1px solid var(--border-color);
+}
+.modal-content.confirmation h2 {
+    color: var(--text-primary);
+}
+.modal-content.confirmation p {
+     color: var(--text-secondary); /* Texto cinza claro */
+     margin-bottom: 2rem;
+     line-height: 1.6;
+}
+.modal-content.confirmation strong {
+    color: var(--primary-color); /* Destaca o nome do ativo em roxo */
+}
+
+.btn-confirm-delete {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--danger-color); /* Botão vermelho */
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-confirm-delete:hover {
+    background: #c62828; /* Vermelho mais escuro */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(255, 119, 130, 0.4);
+}
+
+/* Container de Notificações Toast (Tema Escuro) */
+#toast-container {
+    position: fixed;
+    bottom: 20px; /* Posição inferior */
+    right: 20px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.toast {
+    background-color: var(--bg-card); /* Fundo dos cartões */
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Sombra mais forte */
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    opacity: 0;
+    border: 1px solid var(--border-color);
+    transform: translateX(100%);
+    animation: slideInToast 0.4s ease forwards;
+}
+
+.toast.success { background-color: var(--success-color); color: #111; border-color: var(--success-color);} /* Texto escuro no sucesso */
+.toast.error { background-color: var(--danger-color); color: white; border-color: var(--danger-color);}
+.toast.info { background-color: var(--info-blue); color: white; border-color: var(--info-blue);} /* Adiciona tipo info */
+
+.toast i { font-size: 1.3rem; }
+
+@keyframes slideInToast {
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOutToast { 
+    to { opacity: 0; transform: translateX(100%); } 
+}
+
+/* Modal Adicionar/Editar (Tema Escuro) */
+.modal-content {
+    background: var(--bg-light); /* Fundo escuro */
+    padding: 2.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+}
+.modal-content h2 { color: var(--text-primary); }
+.form-group label { color: var(--text-secondary); }
+.form-group input,
+.form-group select {
+    background-color: var(--bg-dark); /* Mais escuro */
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+.form-group input:focus,
+.form-group select:focus { border-color: var(--primary-color); }
+
+.btn-cancel { border: 1px solid var(--text-secondary); color: var(--text-secondary); }
+.btn-cancel:hover { background-color: var(--bg-card); }
+.btn-save { background: var(--sexto-color); }
+.btn-save:hover { background: var(--quarto-color); box-shadow: 0 4px 10px rgba(114, 54, 198, 0.3);}
+
+/* --- ESTILOS CORRIGIDOS E ALINHADOS PARA A TABELA DE ATIVOS --- */
+
+
+/* Wrapper da Tabela (Fundo Gradiente) */
+/* --- ESTILOS CORRIGIDOS PARA TABELA COM GRADIENTE E TEXTO CLARO --- */
+
+/* Wrapper da Tabela (Fundo Gradiente) */
+.table-wrapper {
+    /* Aplica o gradiente roxo de 3 cores */
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color)); 
+    border-radius: 1.5rem; 
+    padding: 1.5rem; 
+    box-shadow: 0 8px 16px var(--shadow-dark); /* Sombra mais escura */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Borda branca bem sutil */
+    margin-top: 2rem;
+    overflow-x: auto; 
+}
+
+/* Tabela de Inventário (Fundo Transparente, Texto Branco) */
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px; 
+    color: var(--text-color);
+}
+
+.inventory-table thead th {
+    color: rgba(247, 243, 243, 0.85); /* Texto do cabeçalho branco suave */
+    font-weight: 600; 
+    text-align: left; 
+    padding: 0.8rem 1rem; 
+    /* Borda inferior branca com mais transparência */
+    border-bottom: 1px solid rgba(247, 243, 243, 0.2); 
+    font-size: 0.9rem;
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    white-space: nowrap; 
+}
+
+/* Alinha cabeçalhos específicos */
+.inventory-table thead th:nth-child(3), /* Status */
+.inventory-table thead th:nth-child(4), /* Condição */
+.inventory-table thead th:nth-child(5) { /* Ações */
+    text-align: center;
+}
+
+
+.inventory-table tbody td {
+    color: var(--text-color); /* Texto principal branco */
+    padding: 1rem 1rem;
+    /* Borda inferior branca com mais transparência */
+    border-bottom: 1px solid rgba(247, 243, 243, 0.1); 
+    font-size: 0.9rem;
+    vertical-align: middle; 
+    text-align: left; 
+    white-space: nowrap; 
+}
+
+.inventory-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Primeira coluna (Nome) já está branca */
+
+/* Colunas Status, Condição e Ações centralizadas */
+.inventory-table td:nth-child(3),
+.inventory-table td:nth-child(4),
+.inventory-table td:nth-child(5) {
+    text-align: center;
+}
+
+/* Coluna de Ações */
+.inventory-table td:last-child {
+     text-align: right; 
+}
+
+.action-icons i {
+    font-size: 1.2rem; 
+    cursor: pointer;
+    margin: 0 0.4rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+    color: rgba(247, 243, 243, 0.75); /* Ícones brancos com leve transparência */
+}
+.action-icons i:hover {
+    transform: scale(1.15);
+    color: var(--text-color); /* Branco sólido no hover */
+}
+/* Cores específicas no hover (mantidas) */
+.action-icons .bi-pencil-square:hover { color: var(--success-color); } 
+.action-icons .bi-trash:hover { color: var(--danger-color); }
+
+/* Remove linhas alternadas */
+.inventory-table tbody tr:nth-child(even) {
+    background-color: transparent; 
+}
+
+/* Hover suave nas linhas */
+.inventory-table tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.05); /* Branco bem transparente no hover */
+    color: var(--text-color); 
+}
+
+/* Cores de Status e Condição (já devem funcionar com as classes .danger, .warning, .success) */
+/* Garante que as cores de status sobrescrevam a cor padrão da célula */
+.inventory-table .danger { color: var(--danger-color) !important; }
+.inventory-table .warning { color: var(--warning-color) !important; }
+.inventory-table .success { color: var(--success-color) !important; }
+/* --- ESTILOS CORRIGIDOS DO MODAL (TEMA ESCURO) --- */
+
+/* Overlay escuro */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo escuro semi-transparente */
+    z-index: 2000;
+    display: none; /* Controlado por JavaScript */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    animation: fadeInModal 0.3s ease forwards;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Conteúdo da janela Modal */
+.modal-content {
+    background: var(--bg-light); /* Fundo escuro secundário (igual ao menu) */
+    padding: 2.5rem;
+    border-radius: 1rem;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px var(--shadow-dark); /* Sombra mais escura */
+    border: 1px solid var(--border-color); /* Borda sutil */
+    transform: scale(0.95);
+    animation: zoomInModal 0.3s ease forwards;
+}
+
+@keyframes zoomInModal {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h2 {
+    margin-bottom: 2rem;
+    color: var(--text-primary); /* Título branco */
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+/* Grupos do formulário (label + input) */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 500;
+    color: var(--text-secondary); /* Label cinza claro */
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    background-color: var(--bg-dark); /* Fundo dos inputs bem escuro */
+    border: 1px solid var(--border-color); /* Borda sutil */
+    color: var(--text-primary); /* Texto branco */
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-color); /* Borda roxa clara ao focar */
+    box-shadow: 0 0 0 3px rgba(167, 136, 217, 0.2); /* Sombra roxa suave */
+    outline: none;
+}
+/* Placeholder cinza claro */
+.form-group input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+
+/* Ações do Modal (botões) */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.btn-cancel {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--text-secondary); /* Borda cinza */
+    background: transparent;
+    color: var(--text-secondary); /* Texto cinza */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-cancel:hover {
+    background-color: var(--bg-card); /* Fundo do cartão no hover */
+    color: var(--text-primary); /* Texto branco no hover */
+    border-color: var(--bg-card);
+}
+
+.btn-save {
+     padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--sexto-color); /* Botão roxo */
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-save:hover {
+    background: var(--quarto-color); /* Roxo mais vibrante */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(114, 54, 198, 0.3);
+}
+
+/* --- ESTILOS PARA O MODAL (ADICIONAR/EDITAR ATIVO) --- */
+
+/* Overlay escuro */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6); /* Fundo escuro semi-transparente */
+    z-index: 2000;
+    display: none; /* Controlado por JavaScript */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    animation: fadeInModal 0.3s ease forwards;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Conteúdo da janela Modal */
+.modal-content {
+    background: white; /* Fundo branco para contraste */
+    padding: 2.5rem;
+    border-radius: 1rem; /* Bordas arredondadas */
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: scale(0.95); /* Efeito inicial para animação */
+    animation: zoomInModal 0.3s ease forwards; /* Animação de entrada */
+}
+
+@keyframes zoomInModal {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h2 {
+    margin-bottom: 2rem;
+    color: var(--oitavo-color); /* Título roxo escuro */
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+/* Grupos do formulário (label + input) */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.6rem; /* Mais espaço */
+    font-weight: 600; /* Label mais forte */
+    color: #555; /* Cinza escuro */
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.9rem 1rem; /* Padding interno */
+    border-radius: 8px;
+    background-color: #f9f9f9; /* Fundo cinza claro */
+    border: 1px solid #ccc;
+    color: #363949; /* Texto escuro */
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--sexto-color); /* Borda roxa ao focar */
+    box-shadow: 0 0 0 3px rgba(114, 54, 198, 0.15); /* Sombra roxa suave */
+    outline: none;
+}
+/* Placeholder cinza */
+.form-group input::placeholder {
+    color: #999;
+}
+
+
+/* Ações do Modal (botões) */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2.5rem;
+}
+
+.btn-cancel {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: transparent;
+    color: #677483; /* Cinza */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-cancel:hover {
+    background-color: #eee;
+    transform: translateY(-1px);
+}
+
+.btn-save {
+     padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--sexto-color); /* Botão roxo */
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-save:hover {
+    background: var(--quarto-color); /* Roxo mais vibrante */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(114, 54, 198, 0.3);
+}
+
+/* Estilos para Modal de Confirmação (se usar, ajustar cores) */
+.modal-content.confirmation {
+    /* Manter ou ajustar estilos aqui */
+    background: white; /* Fundo branco */
+}
+.modal-content.confirmation h2 { color: var(--oitavo-color); }
+.modal-content.confirmation p { color: var(--text-color-dark); }
+.modal-content.confirmation strong { color: var(--sexto-color); }
+.btn-confirm-delete { background: var(--danger-color); }
+.btn-confirm-delete:hover { background: #c62828; box-shadow: 0 4px 10px rgba(255, 119, 130, 0.4); }
+
+/* Estilos para Notificações Toast (ajustar cores) */
+
+.toast {
+    background-color: var(--sexto-color); /* Fundo roxo */
+    color: white;
+
+}
+.toast.success { background-color: var(--success-color); color: #333; }
+.toast.error { background-color: var(--danger-color); }
+.toast.info { background-color: var(--info-blue); } /* Ajustar cor se necessário */
+
+/* Layout padrão (para PC) */
+.container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 80px;
+}
+
+/* Quando a tela for menor que 768px (celular) */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* elementos empilham */
+    padding: 10px 20px;
+  }
+
+  img {
+    width: 100%; /* imagem se ajusta à tela */
+    height: auto;
+  }
+
+  h1 {
+    font-size: 1.5rem; /* texto menor em telas pequenas */
+  }
+}
+
+
+/* Layout padrão (para PC) */
+.container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 80px;
+}
+
+/* Quando a tela for menor que 768px (celular) */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* elementos empilham */
+    padding: 10px 20px;
+  }
+
+  img {
+    width: 100%; /* imagem se ajusta à tela */
+    height: auto;
+  }
+
+  h1 {
+    font-size: 1.5rem; /* texto menor em telas pequenas */
+  }
+}
+
+/* ADICIONE ISTO AO FINAL DO SEU ARQUIVO "style.css" */
+
+/* Alinha o TÍTULO "Ações" (a 6ª coluna) para a direita */
+.inventory-table thead th:nth-child(6) {
+  text-align: right;
+}
+
+/* Garante que o CONTEÚDO (os ícones) da 6ª coluna também fique à direita */
+.inventory-table tbody td:nth-child(6) {
+  text-align: right;
+}
+
+/* COLE ISTO NO FINAL DO SEU ARQUIVO style.css */
+
+/* ======================================================= */
+/* === 1. CORREÇÃO DA HOME PARA O MENU (Todas as Telas) === */
+/* ======================================================= */
+
+main.welcome-screen.ativo {
+    transform: translateX(300px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* ================================================== */
+/* === 2. RESPONSIVIDADE DA PÁGINA "HOME" (Celular) === */
+/* ================================================== */
+
+/* * Estas regras só aplicam em telas pequenas (como a do seu screenshot)
+*/
+@media screen and (max-width: 991px) {
+
+    /* Esconde a logo "Hosts" flutuante (ela já está no menu) */
+    .logo-top-left {
+        display: none;
+    }
+
+    /* Ajusta o container principal da Home */
+    main.welcome-screen {
+        height: 100vh;      /* Ocupa a tela inteira */
+        overflow-y: auto;   /* Permite rolar se o conteúdo for grande */
+        padding: 20px;
+        padding-top: 80px;  /* Dá espaço para o botão do menu no topo */
+    }
+
+    /* Empilha o conteúdo da Home (imagem em cima, texto embaixo) */
+    main.welcome-screen .hero {
+        flex-direction: column-reverse; /* Coloca a imagem (.hero-right) ANTES do texto (.hero-left) */
+        text-align: center;
+        width: 100%;
+        padding: 0;
+    }
+
+    /* Remove o padding do container de texto */
+    main.welcome-screen .hero-left {
+        padding-right: 0; 
+    }
+
+    /* Corrige a imagem "flutuante" */
+    main.welcome-screen .circle-image {
+        position: relative; /* Tira do 'absolute' para poder centralizar */
+        width: 250px;       /* Tamanho menor para celular */
+        height: 250px;
+        margin: 0 auto 2rem auto; /* Centraliza a imagem */
+        right: auto;
+        top: auto;
+        transform: none;    /* Reseta a posição */
+    }
+    
+    /* Diminui os textos para caber */
+    main.welcome-screen .hero-title {
+        font-size: 2.5rem; 
+    }
+    
+    main.welcome-screen .hero-sub {
+        font-size: 1rem; 
+        padding: 0 10px; /* Evita que o texto encoste nas bordas */
+    }
+}
+
+/* ======================================================= */
+/* === ESCONDE A COLUNA DE AÇÕES EM 'ATIVOS ONLINE' === */
+/* ======================================================= */
+
+/* Esconde o TÍTULO "AÇÕES" */
+.page-ativos-online .inventory-table th:nth-child(6) {
+    display: none;
+}
+
+/* Esconde a CÉLULA com os ícones em cada linha */
+.page-ativos-online .inventory-table td:nth-child(6) {
+    display: none;
+}
+
+.password-toggle-icon {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #888; 
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.password-toggle-icon:hover {
+    color: #9039d4; 
+    transform:scale(1.1);
+}
+
+
+.password-toggle-icon:active {
+    color: #382faa; 
+    transform:scale(0.95);
+}
+
+/* --- CLASSE ESSENCIAL PARA ALINHAR OS DOIS BOTÕES LADO A LADO --- */
+.asset-actions-header {
+    display: flex; /* Habilita o alinhamento horizontal */
+    gap: 10px; /* Espaço entre os botões */
+}
+
+/* --- ESTILO BASE PARA O NOVO BOTÃO 'ATUALIZAR' (Outline Roxo) --- */ 
+.botao-secundario {
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px; 
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    
+    /* Cores usando suas variáveis: */
+    background-color: white; 
+    color: var(--quarto-color); 
+    border: 1px solid var(--quarto-color); 
+}
+
+.botao-secundario:hover {
+    background-color: #f0e6fa; 
+    box-shadow: 0 2px 5px rgba(144, 57, 212, 0.2);
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.botoes-header {
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+}
+
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+
+/* ======================================================= */
+/* === INÍCIO DAS CORREÇÕES DE RESPONSIVIDADE === */
+/* Cole este bloco no FINAL do seu arquivo style.css */
+/* ======================================================= */
+
+/* --- 1. CORREÇÃO DO MENU LATERAL (Para telas curtas) --- */
+/* Adiciona rolagem vertical ao menu se o conteúdo for maior que a tela */
+.menu-lateral {
+overflow-y: auto;
+z-index: 1000;
+}
+.botao-menu {
+    z-index: 1002; /* Botão acima de tudo */
+}
+.background {
+z-index: 999; /* Overlay entre o menu e o conteúdo */
+}
+
+
+/* --- 2. CORREÇÃO DA PÁGINA HOME (Desktop e Mobile) --- */
+
+/* Ajuste para Desktop (como sua tela de 1300px) */
+/* Força a imagem a se comportar dentro do flexbox em vez de flutuar */
+.circle-image {
+position: relative !important; /* Remove o 'position: absolute' problemático */
+width: 45vw; /* Largura baseada no tamanho da tela */
+height: 45vw;
+max-width: 550px; /* Limite máximo de tamanho */
+max-height: 550px;
+right: auto; /* Reseta o posicionamento */
+top: auto; /* Reseta o posicionamento */
+transform: none; /* Reseta o posicionamento */
+background-position: center;
+margin-left: 2rem; /* Adiciona um espaço da borda */
+}
+
+.hero-right {
+flex: none; /* Container da imagem usa o tamanho da imagem */
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.hero-left {
+flex: 1; /* Container do texto ocupa o espaço restante */
+}
+.hero-title {
+font-size: 4rem; /* Um pouco menor para caber melhor */
+}
+
+
+/* --- 3. LOGO FLUTUANTE (Novo Recurso) --- */
+/* Esconde a logo por padrão */
+.logo-bottom-right {
+display: none;
+}
+
+/* Mostra a logo APENAS na página de boas-vindas */
+body:has(main.welcome-screen) .logo-bottom-right {
+display: block;
+position: absolute;
+bottom: 25px;
+right: 25px;
+width: 150px; /* Ajuste o tamanho conforme necessário */
+height: auto;
+z-index: 1001; /* Acima do conteúdo e overlay */
+opacity: 0.7;
+transition: opacity 0.3s ease;
+}
+body:has(main.welcome-screen) .logo-bottom-right:hover {
+opacity: 1;
+}
+
+
+/* --- 4. CORREÇÃO GERAL (Telas Pequenas / Mobile) --- */
+/* Para telas menores que 768px */
+@media screen and (max-width: 768px) {
+
+   
+    .menu-lateral {
+width: 280px;
+left: -280px; 
+ }
+
+  
+.conteudo {
+margin-left: 0 !important; /* Reseta a margem */
+padding: 20px;
+padding-top: 80px; /
+}
+    
+    .conteudo.ativo {
+ margin-left: 0 !important; }
+
+    
+    .botao-menu.ativo {
+left: 20px; 
+ }
+
+ .hero-title {
+font-size: 2.5rem;
+ }
+
+ }
+
+
+ /* ======================================================= */
+/* === CORREÇÃO DO MENU LATERAL (LAYOUT FLEX) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Transforma o menu em um container flexível de coluna */
+.menu-lateral {
+    display: flex;
+    flex-direction: column;
+    /* Remove a rolagem do menu principal (ela vai para a lista) */
+    overflow-y: hidden;
+}
+
+/* 2. Sobrescreve a margem gigante da "Conta" */
+.conta-item {
+    margin-bottom: 30px;
+}
+
+/* 3. Faz a lista de links (Home, Dashboard...) crescer e rolar */
+.menu-lateral ul {
+    flex-grow: 1; /* Faz a lista ocupar todo o espaço do meio */
+    overflow-y: auto; /* Adiciona rolagem SÓ nesta lista */
+}
+
+/* 4. Tira o "Logout" da posição absoluta */
+.logout-item {
+    position: relative; /* Sobrescreve o 'absolute' anterior */
+    bottom: auto; /* Sobrescreve o 'bottom: 0' anterior */
+}
+
+/* ======================================================= */
+/* === OCULTAR BARRA DE ROLAGEM DO MENU === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* Esconde a barra de rolagem no Firefox e IE/Edge */
+.menu-lateral ul {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* Esconde a barra de rolagem no Chrome, Safari e Edge */
+.menu-lateral ul::-webkit-scrollbar {
+    display: none;
+}
+
+
+
+/* ======================================================= */
+/* === DIMINUI BOTÕES PARA CABER EM TELAS CURTAS === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* Estas regras só ativam se a ALTURA do navegador for 700px ou menor */
+@media (max-height: 700px) {
+
+   /* ======================================================= */
+/* === AJUSTE DE TAMANHO (UM POUCO MAIOR) DOS BOTÕES DO MENU === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Ajusta o item "Conta" */
+.conta-item {
+    padding: 18px 25px; /* Mais espaçamento */
+    margin-bottom: 25px;
+}
+
+.conta-item a {
+    font-size: 20px; /* Fonte maior */
+    gap: 10px; /* Espaço padrão */
+}
+
+.conta-item a i {
+    font-size: 44px; /* Ícone maior */
+}
+
+/* 2. Ajusta os links do meio (Home, Dashboard, etc.) */
+.menu-lateral ul li {
+    padding: 18px 25px; /* Mais espaçamento */
+}
+
+.menu-lateral ul li a {
+    font-size: 20px; /* Fonte maior */
+    gap: 10px; /* Espaço padrão */
+}
+
+.menu-lateral ul li a i {
+    font-size: 24px; /* Ícone maior */
+}
+
+/* 3. Ajusta o item "Logout" */
+.logout-item a {
+    padding: 18px 25px; /* Mais espaçamento */
+    font-size: 20px; /* Fonte maior */
+    gap: 10px; /* Espaço padrão */
+}
+
+}
+
+
+/* ======================================================= */
+/* === ANIMAÇÃO DO CONTEÚDO DA PÁGINA DE CONFIGURAÇÕES === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* Ajusta a transição e posição do container de conteúdo */
+.conteudo-configuracoes {
+    transition: margin-left 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    margin-left: 0; /* Posição inicial sem o menu aberto */
+    padding-left: 30px; /* Adiciona um padding para o conteúdo não colar na borda */
+    padding-right: 30px; /* Padding na direita também */
+}
+
+/* Quando o menu está ativo, empurra o conteúdo da página para o lado */
+.menu-lateral.ativo + .main-content .configuracoes-screen .conteudo-configuracoes {
+    margin-left: 300px; /* Deve ser o mesmo valor da largura do seu menu */
+}
+
+/* Para telas menores que 991px, o conteúdo volta para a posição inicial */
+@media screen and (max-width: 991px) {
+    .conteudo-configuracoes {
+        margin-left: 0; /* Volta para 0 em telas pequenas */
+    }
+}
+
+/* ======================================================= */
+/* === AJUSTE ESPAÇAMENTO PÁGINA CONFIGURAÇÕES === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* Adiciona um espaço acima do cartão de usuário */
+.configuracoes-wrapper {
+    margin-top: 4rem; /* Ajuste este valor (ex: 4rem) se quiser mais espaço */
+}
+
+
+
+.hero .logo-bottom-right:hover {
+    opacity: 1;
+}
+
+.hero-left {
+    /* Adiciona um preenchimento na parte de baixo do bloco da esquerda. */
+    /* Isso força o 'align-items: center' a empurrar o bloco para cima. */
+    padding-bottom: 30vh; /* Experimente 10vh. Mude para '15vh' se quiser mais para cima. */
+}
+
+/* ======================================================= */
+/* === REMOVER BORDA DE FOCO DO BOTÃO DE MENU === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* Remove o 'outline' (a borda) que aparece depois de clicar no botão */
+.botao-menu:focus {
+    outline: none;
+    box-shadow: none; /* Garante que nenhuma sombra de foco apareça */
+}
+
+
+/* SUBSTITUA POR ISTO: */
+main.welcome-screen {
+margin-left: 0; /* Home page é full-width */
+padding: 0;
+height: 100vh;
+display: flex; 
+align-items: center;
+justify-content: center; 
+position: relative;
+overflow: hidden;
+transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+transform: translateX(0);
+}
+
+/* ======================================================= */
+/* === CORREÇÃO COMPLETA DA ANIMAÇÃO (TRANSFORM) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Esconde a barra de rolagem que o 'transform' cria */
+body {
+    overflow-x: hidden;
+}
+
+/* 2. Prepara a HOME PAGE para animar (começa em 0) */
+main.welcome-screen {
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: translateX(0);
+}
+
+/* 3. Move a HOME PAGE (300px) quando o menu está ativo */
+main.welcome-screen.ativo {
+    transform: translateX(300px);
+}
+
+/* 4. Prepara as OUTRAS PÁGINAS para animar (começa em 0) */
+/* (Elas mantêm a margem de 60px, o transform é separado) */
+.conteudo {
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transform: translateX(0);
+}
+
+/* 5. Move as OUTRAS PÁGINAS (300px) quando o menu está ativo */
+.conteudo.ativo {
+    transform: translateX(300px);
+}
+
+/* ======================================================= */
+/* === TABELA "LEGAL" (SEM ESTICAR E SEM ROLAR) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Esconde a 5ª coluna ("Condição") em AMBAS as tabelas */
+.inventory-table thead th:nth-child(5),
+.inventory-table tbody td:nth-child(5) {
+    display: none;
+}
+
+/* 2. Remove a barra de rolagem do container da tabela */
+.table-wrapper {
+    overflow-x: hidden;
+}
+
+/* 3. Força a tabela a ter 100% da largura (IMPORTANTE) */
+.inventory-table {
+    min-width: 100%;
+    width: 100%;
+    table-layout: fixed; /* Essencial para ellipsis funcionar */
+}
+
+/* 4. A MÁGICA: Corta o texto com "..." */
+.inventory-table tbody td,
+.inventory-table thead th {
+    white-space: nowrap;    /* Impede o texto de quebrar a linha (evita "esticar") */
+    overflow: hidden;       /* Esconde o texto que vaza */
+    text-overflow: ellipsis; /* Adiciona os "..." */
+}
+
+/* 5. Exceção: Permite que os ícones de Ação apareçam */
+.inventory-table tbody td:nth-child(6) {
+    overflow: visible;
+}
+
+/* ======================================================= */
+/* === TABELA "VER MAIS" (MANTENDO O GRADIENTE ROXO) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Esconde a 5ª coluna ("Condição") */
+.inventory-table thead th:nth-child(5),
+.inventory-table tbody td:nth-child(5) {
+    display: none;
+}
+
+/* 2. Garante que o container da tabela não tenha scroll */
+.table-wrapper {
+    overflow-x: hidden;
+}
+
+/* 3. Força a tabela a ter 100% e define as larguras */
+.inventory-table {
+    min-width: 100%;
+    width: 100%;
+    table-layout: fixed; /* Essencial para o layout */
+}
+
+/* 4. Define as larguras de cada coluna */
+.inventory-table th:nth-child(1), .inventory-table td:nth-child(1) { width: 40%; } /* Nome do Ativo */
+.inventory-table th:nth-child(2), .inventory-table td:nth-child(2) { width: 20%; } /* MAC */
+.inventory-table th:nth-child(3), .inventory-table td:nth-child(3) { width: 15%; } /* ID/IP */
+.inventory-table th:nth-child(4), .inventory-table td:nth-child(4) { width: 10%; } /* Status */
+.inventory-table th:nth-child(6), .inventory-table td:nth-child(6) { width: 15%; } /* Ações */
+
+
+/* 5. A MÁGICA: Permite que SÓ a Coluna 1 quebre a linha (para o "Ver Mais") */
+.inventory-table th:nth-child(1),
+.inventory-table td:nth-child(1) {
+    white-space: normal;  /* Permite quebrar a linha */
+    word-wrap: break-word;
+    overflow: visible; /* Garante que o "ver mais" não seja cortado */
+}
+
+/* 6. Força as OUTRAS colunas (exceto Ações) a usar "..." */
+.inventory-table th:not(:nth-child(1)):not(:nth-child(6)),
+.inventory-table td:not(:nth-child(1)):not(:nth-child(6)) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 7. Exceção: Permite que os ícones de Ação apareçam */
+.inventory-table tbody td:nth-child(6),
+.inventory-table thead th:nth-child(6) {
+    overflow: visible;
+    white-space: nowrap; /* Ações não devem quebrar linha */
+}
+
+/* 8. Estilo do novo botão "Ver Mais" (COM COR CLARA) */
+.see-more-btn {
+    color: var(--text-color); /* Cor do texto branco */
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: underline; /* Sublinhado para parecer link */
+    display: block;
+    margin-top: 5px;
+}
+.see-more-btn:hover {
+    color: var(--success-color); /* Verde claro no hover */
+}
+
+/* ======================================================= */
+/* === CORREÇÃO DA COR VERDE (PÁGINA ATIVOS ONLINE) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/*
+   Esta é a regra que estava faltando.
+   Ela diz para a classe ".badge-online" usar a cor de sucesso.
+*/
+.badge-online {
+    color: var(--success-color);
+}
+
+/* Vamos adicionar as outras por segurança, caso existam */
+.badge-offline {
+    color: var(--danger-color);
+}
+
+.badge-manutencao {
+    color: var(--warning-color);
+}
+
+
+
+.form-group label[for="assetCondition"],
+.form-group select#assetCondition {
+    display: none;
+}
+
+/* ======================================================= */
+/* === AJUSTE DE PROPORÇÃO (ESTREITO E MAIS ALTO) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Mantém o modal ESTREITO (afasta das bordas) */
+.modal-content {
+    max-width: 440px; /* Mantém a largura estreita */
+    
+    /* 2. Aumenta o espaçamento vertical */
+    padding: 1.8rem 1.5rem; /* Mais padding em cima/baixo */
+}
+
+/* 3. Ajusta o título */
+.modal-content h2 {
+    margin-bottom: 1.8rem; /* Mais espaço abaixo do título */
+    font-size: 1.3rem; /* Título de volta ao tamanho normal */
+}
+
+/* 4. Aumenta o espaçamento entre os campos */
+.form-group {
+    margin-bottom: 1.3rem; /* Mais espaço entre os campos */
+}
+
+/* 5. Mantém os labels */
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* 6. Aumenta a altura dos inputs */
+.form-group input,
+.form-group select {
+    padding: 0.8rem 1rem; /* Mais altura nos inputs */
+    font-size: 0.9rem;
+}
+
+/* 7. Aumenta o espaçamento dos botões */
+.modal-actions {
+    margin-top: 1.8rem; /* Mais espaço acima dos botões */
+}
+
+/* 8. Mantém os botões */
+.btn-cancel,
+.btn-save {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+
+/* ======================================================= */
+/* === CUSTOMIZAÇÃO DA BARRA DE ROLAGEM (COM GRADIENTE) === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Para navegadores WebKit (Chrome, Edge, Safari) */
+
+/* Define a largura da barra */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+/* O "caminho" (fundo) da barra */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* O "botão" (a parte que você arrasta) com o SEU gradiente */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--sexto-color), var(--quinto-color), var(--terciary-color));
+    border-radius: 5px;
+}
+
+/* O "botão" ao passar o mouse (pode ser um gradiente mais claro se quiser) */
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, var(--quarto-color), var(--sexto-color), var(--quinto-color));
+}
+
+/* 2. Para Firefox (Não aceita gradiente, usa a cor sólida) */
+html {
+    scrollbar-width: thin;
+    /* [Cor do "botão"] [Cor do "caminho"] */
+    scrollbar-color: var(--sexto-color) #f1f1f1;
+}
+
+/* ======================================================= */
+/* === ESTILOS PARA OCULTAR TABELA E BOTÃO "VER MAIS" === */
+/* Cole este bloco no FINAL do seu style.css */
+/* ======================================================= */
+
+/* 1. Esta classe vai esconder as linhas 11+ */
+.hidden-asset-row {
+    display: none;
+}
+
+/* 2. Estilo do novo botão "Ver Mais" */
+.load-more-btn {
+    display: block; /* Ocupa a própria linha */
+    width: 200px; /* Largura fixa */
+    margin: 1.5rem auto 0 auto; /* Centraliza e dá espaço no topo */
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    
+    /* Visual "fantasma" que combina com seu botão "Atualizar" */
+    background-color: white; 
+    color: var(--sexto-color); 
+    border: 1px solid var(--sexto-color); 
+}
+
+.load-more-btn i {
+    margin-right: 8px; /* Espaço para os "3 pontinhos" */
+}
+
+.load-more-btn:hover {
+    background-color: #f0e6fa; /* Roxo bem claro no hover */
+    box-shadow: 0 2px 5px rgba(144, 57, 212, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ======================================================= */
+/* === NOVO ESTILO: NOTIFICAÇÃO DE ERRO DO LOGIN (TEMPORÁRIO) === */
+/* ======================================================= */
+
+#login-error {
+    /* Cor de fundo e texto (usando suas variáveis) */
+    background: var(--danger-color);
+    color: var(--text-color);
+    
+    /* Formato de Notificação */
+    padding: 10px 15px; 
+    margin-top: 1rem;
+    border-radius: 8px; 
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    /* ANIMAÇÃO (Melhora a experiência) */
+    transition: all 0.3s ease;
+}
+
+/* Garante que o texto de erro na div vermelha seja visível em qualquer tema */
+.login-error a {
+    color: var(--text-color);
+    text-decoration: underline;
+}

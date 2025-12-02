@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/login.css">
+    <title>Hosts | Login</title>
+    <!-- REMOVIDO: O script de toggle será carregado no final -->
+</head>
+<body>
+    <main class="container">
+        <!-- CORRIGIDO: Removido o 'action' -->
+        <form> 
+            <h1>Login Hosts</h1>
+            <div class="input-box">
+                <input id="login-email" placeholder="Usuário (email)" type="email" required>
+                <i class="bx bxs-user"></i>
+            </div>
+            <div class="input-box">
+                <input id="login-password" placeholder="Senha" type="password" required>
+                <i class="bx bxs-lock-alt"></i>
+                <i id="toggle-password" class="bx bx-hide" style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePasswordVisibility('login-password', 'toggle-password')"></i>
+            </div>
+            <div class="remember-forgot">
+                <label>
+                    <input type="checkbox"> Lembrar minha senha
+                </label>
+                <a href="#">Esqueci a senha</a>
+            </div>
+            <button type="submit" class="login">Login</button> 
+            <!-- DIV para mensagens de erro -->
+            <div id="login-error" class="login-error" style="color: #ff7777; margin-top: .5rem;"></div>
+        </form>
+    </main>
+    
+    <!-- ESSENCIAL: Carregar o script de login e toggle aqui, no final do corpo -->
+    <script src="js/login.js"></script>
+</body>
+</html>
