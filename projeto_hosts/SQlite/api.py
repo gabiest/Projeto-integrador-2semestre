@@ -2,518 +2,353 @@
 import sqlite3
 import datetime
 import os
+import subprocess
+import time
+import threading
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
+# --- Importações Específicas para o Scan ---
+import nmap
+from getmac import get_mac_address
+
+# --- CONFIGURAÇÃO DA REDE ALVO ---
+TARGET_NETWORK = '192.168.15.0/24'
+
 # --- Caminhos Importantes ---
-# PASTA_RAIZ_PROJETO é a pasta '.../PROJETO HOSTS' (a pasta "pai" da pasta 'SQLite')
 PASTA_RAIZ_PROJETO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-# PASTA_SQLITE é onde este script (api.py) está
 PASTA_SQLITE = os.path.dirname(__file__)
-
-# O caminho correto para o banco de dados (que está DENTRO da pasta SQLite)
 DB_FILE = os.path.join(PASTA_SQLITE, 'meu_banco.db') 
 
 # --- Configuração do Aplicativo Flask ---
-# Configura o Flask para servir arquivos estáticos (css, js) da PASTA_RAIZ_PROJETO
 app = Flask(__name__, static_folder=PASTA_RAIZ_PROJETO)
-
-# Habilita CORS para todas as rotas da API (prefixo /api/)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-# --- Rotas do Servidor Web (Front-end) ---
+# =======================================================
+#   ROTAS DO SERVIDOR WEB (FRONT-END)
+# =======================================================
 
-@app.route('/') # Rota para a raiz (ex: http://127.0.0.1:5000/)
+@app.route('/') 
 def serve_index():
-    """ Envia o usuário para a página de login por padrão. """
     try:
-        # Tenta servir 'login.html' da pasta 'login'
         return send_from_directory(os.path.join(PASTA_RAIZ_PROJETO, 'login'), 'login.html')
     except FileNotFoundError:
         return "Erro: Arquivo 'login/login.html' não encontrado.", 404
 
 @app.route('/<path:filename>')
 def serve_static_files(filename):
-    """
-    Esta rota serve todos os seus arquivos de front-end (CSS, JS, HTML, imagens).
-    Ela é inteligente e procura nas pastas certas.
-    """
-    
-    # 1. Tenta servir o arquivo da raiz (pega css/style.css, js/script.js, imagens/logo.png, etc.)
     full_path = os.path.join(PASTA_RAIZ_PROJETO, filename)
     if os.path.isfile(full_path):
         return send_from_directory(PASTA_RAIZ_PROJETO, filename)
+    
+    # Procura em subpastas comuns para evitar erros 404 em assets
+    for folder in ['templates', 'login', 'css', 'js', 'imagens']:
+        path = os.path.join(PASTA_RAIZ_PROJETO, folder, filename)
+        if os.path.isfile(path):
+            return send_from_directory(os.path.join(PASTA_RAIZ_PROJETO, folder), filename)
 
-    # 2. Tenta servir da pasta 'templates' (dashboard.html, home.html, etc.)
-    template_path = os.path.join(PASTA_RAIZ_PROJETO, 'templates', filename)
-    if os.path.isfile(template_path):
-        return send_from_directory(os.path.join(PASTA_RAIZ_PROJETO, 'templates'), filename)
-
-    # 3. Tenta servir da pasta 'login' (caso seja chamado diretamente)
-    login_path = os.path.join(PASTA_RAIZ_PROJETO, 'login', filename)
-    if os.path.isfile(login_path):
-        return send_from_directory(os.path.join(PASTA_RAIZ_PROJETO, 'login'), filename)
-
-    # 4. Fallback: Se não achar, retorna um erro 404
     return "Arquivo não encontrado.", 404
 
 
-# --- Funções de Banco de Dados (Helpers) ---
+# =======================================================
+#   FUNÇÕES DE BANCO DE DADOS
+# =======================================================
 
 def conectar():
-    """
-    Cria e retorna uma conexão com o banco.
-    Usamos 'row_factory' para que o banco retorne dicionários.
-    """
     conexao = sqlite3.connect(DB_FILE)
     conexao.row_factory = sqlite3.Row 
     return conexao
 
 def registrar_alerta(tipo, mensagem):
-    """ Insere um novo registro na tabela 'alertas'. """
     try:
         data_agora = datetime.datetime.now().isoformat()
         conexao = conectar()
-        conexao.execute(
-            "INSERT INTO alertas (data_hora, tipo_alerta, mensagem) VALUES (?, ?, ?)",
-            (data_agora, tipo, mensagem)
-        )
+        conexao.execute("INSERT INTO alertas (data_hora, tipo_alerta, mensagem) VALUES (?, ?, ?)", (data_agora, tipo, mensagem))
         conexao.commit()
-    except Exception as e:
-        print(f"ERRO AO REGISTRAR ALERTA: {e}")
-    finally:
-        if 'conexao' in locals() and conexao:
-            conexao.close()
+        conexao.close()
+    except: pass
 
 def criar_tabelas_iniciais():
-    """ Garante que TODAS as tabelas existam e a coluna 'tipo' em ativos_online. """
     try:
         conexao = conectar()
-        
-        # 1. Tabela de Usuários
-        conexao.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            email TEXT,
-            senha TEXT NOT NULL
-        )''')
-        
-        # 2. Tabela de Ativos
-        conexao.execute('''
-        CREATE TABLE IF NOT EXISTS ativos_online (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            ip_address TEXT,
-            mac_address TEXT,
-            status TEXT,
-            condicao TEXT,
-            data_inicio TEXT,
-            tipo TEXT 
-        )''')
-        
-        # 3. Tabela de Alertas
-        conexao.execute('''
-        CREATE TABLE IF NOT EXISTS alertas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data_hora TEXT NOT NULL,
-            tipo_alerta TEXT,
-            mensagem TEXT
-        )''')
-
-        # --- NOVIDADE: Adicionar coluna 'tipo' em ativos_online, se não existir ---
+        conexao.execute('''CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT, senha TEXT)''')
+        conexao.execute('''CREATE TABLE IF NOT EXISTS ativos_online (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, ip_address TEXT, mac_address TEXT, status TEXT, condicao TEXT, data_inicio TEXT, tipo TEXT)''')
+        conexao.execute('''CREATE TABLE IF NOT EXISTS alertas (id INTEGER PRIMARY KEY AUTOINCREMENT, data_hora TEXT, tipo_alerta TEXT, mensagem TEXT)''')
         try:
             conexao.execute("ALTER TABLE ativos_online ADD COLUMN tipo TEXT")
-            print("INFO: Coluna 'tipo' adicionada à tabela 'ativos_online'.")
-        except sqlite3.OperationalError as e:
-            # Ignora o erro se a coluna já existe
-            if "duplicate column name: tipo" not in str(e):
-                raise e 
-
+        except sqlite3.OperationalError: pass 
         conexao.commit()
-        print("Todas as tabelas (Usuários, Ativos, Alertas) foram verificadas/criadas/atualizadas.")
-        
+        print("Tabelas verificadas.")
     except Exception as e:
-        print(f"Erro ao criar tabelas: {e}")
-    finally:
-        if 'conexao' in locals() and conexao:
-            conexao.close()
+        print(f"Erro tabelas: {e}")
 
 
 # =======================================================
-#  ROTAS DA API (ENDPOINTS)
+#   MÓDULO DE SCAN DE REDE
 # =======================================================
 
-# --- ROTA DE LOGIN ---
-@app.route('/api/login', methods=['POST'])
-def login():
-    dados = request.json
-    email = dados.get('email').strip() if dados.get('email') else None
-    senha = dados.get('senha').strip() if dados.get('senha') else None
-
-    # DEBUG EXPLÍCITO NO TERMINAL
-    print(f"\n--- TENTATIVA DE LOGIN ---")
-    print(f"Email recebido: '{email}'")
-
-    if not email or not senha:
-        print("RESULTADO: Falha (Credenciais ausentes)")
-        return jsonify({"erro": "Email e senha são obrigatórios"}), 400
-
+def netbios_lookup(ip_address):
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        
-        # Tenta buscar o usuário pelo e-mail
-        cursor.execute("SELECT * FROM usuarios WHERE email = ?", (email,))
-        usuario = cursor.fetchone()
-        
-        if not usuario:
-            print("RESULTADO: Falha (Usuário não encontrado no DB)")
-            conexao.close()
-            return jsonify({"erro": "Email ou senha incorretos"}), 401 
-            
-        # Limpa espaços em branco na senha armazenada (se houver)
-        senha_db = usuario['senha'].strip()
-        
-        # DEBUG: Exibir senha do banco
-        print(f"Senha do banco (DEBUG): '{senha_db}' | Senha digitada: '{senha}'")
-        
-        # Compara a senha do banco com a senha recebida
-        if senha_db != senha: 
-            print("RESULTADO: Falha (Senha incorreta)")
-            conexao.close()
-            return jsonify({"erro": "Email ou senha incorretos"}), 401
+        if os.name == 'nt':
+            cmd = ['nbtstat', '-A', ip_address]
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=1)
+            for line in res.stdout.splitlines():
+                if '<20>' in line and 'UNIQUE' in line: return line.split()[0].strip()
+    except: pass 
+    return None
 
-        # Sucesso
-        print(f"RESULTADO: SUCESSO! Usuário: {usuario['nome']}")
-        conexao.close()
-        user_data = {
-            "id": usuario['id'],
-            "nome": usuario['nome'],
-            "email": usuario['email']
-        }
-        return jsonify({"mensagem": "Login bem-sucedido!", "usuario": user_data}), 200
+def classificar_tipo_inteligente(nome, vendor):
+    texto = (str(nome) + " " + str(vendor)).lower()
+    if any(x in texto for x in ['iphone', 'android', 'galaxy', 'samsung', 'xiaomi', 'motorola']): return "Smartphone"
+    if any(x in texto for x in ['notebook', 'laptop', 'thinkpad', 'latitude', 'inspiron']): return "Notebook"
+    if any(x in texto for x in ['desktop', 'pc', 'computador', 'windows', 'linux', 'optiplex']): return "Computador"
+    if any(x in texto for x in ['epson', 'hp', 'canon', 'brother']): return "Impressora"
+    if any(x in texto for x in ['router', 'switch', 'cisco', 'tp-link', 'ubiquiti']): return "Rede"
+    return "Outros Dispositivos"
 
-    except Exception as e:
-        print(f"ERRO DE SERVIDOR NO LOGIN: {e}")
-        return jsonify({"erro": str(e)}), 500
-
-@app.route('/api/logout', methods=['POST'])
-def logout():
-    return jsonify({"mensagem": "Logout bem-sucedido!"}), 200
-
-
-# --- ROTA DE TROCA DE SENHA (NOVA) ---
-@app.route('/api/trocar-senha', methods=['POST'])
-def trocar_senha():
-    dados = request.json
-    id_usuario = dados.get('id')
-    senha_atual = dados.get('senha_atual')
-    nova_senha = dados.get('nova_senha')
-
-    if not id_usuario or not senha_atual or not nova_senha:
-        return jsonify({"erro": "Todos os campos são obrigatórios."}), 400
-
+# --- SCAN COMPLETO (Botão Atualizar Inventário) ---
+def executar_scan_completo():
+    print(f"\n📡 [MANUAL] SCAN NA REDE: {TARGET_NETWORK}")
+    nm = nmap.PortScanner()
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-
-        # 1. Verifica se a senha atual está correta para este usuário
-        cursor.execute("SELECT senha FROM usuarios WHERE id = ?", (id_usuario,))
-        resultado = cursor.fetchone()
-
-        if not resultado:
-            conexao.close()
-            return jsonify({"erro": "Usuário não encontrado."}), 404
-        
-        senha_no_banco = resultado['senha'].strip()
-
-        # Verifica se a senha antiga digitada bate com a do banco
-        if senha_no_banco != senha_atual.strip():
-            conexao.close()
-            return jsonify({"erro": "A senha atual está incorreta."}), 401
-
-        # 2. Se a senha antiga bateu, atualiza para a nova
-        cursor.execute("UPDATE usuarios SET senha = ? WHERE id = ?", (nova_senha.strip(), id_usuario))
-        conexao.commit()
-        conexao.close()
-
-        print(f"Sucesso: Senha alterada para o usuário ID {id_usuario}")
-        return jsonify({"mensagem": "Senha alterada com sucesso!"}), 200
-
+        nm.scan(hosts=TARGET_NETWORK, arguments='-sn -PR -T5 --min-hostgroup 100')
     except Exception as e:
-        print(f"Erro ao trocar senha: {e}")
-        return jsonify({"erro": str(e)}), 500
+        print(f"Erro Nmap: {e}")
+        return False
 
+    live_hosts = nm.all_hosts()
+    if not live_hosts: return True 
 
-# --- CRUD: USUÁRIOS ---
-
-@app.route('/api/usuarios', methods=['GET'])
-def get_usuarios():
-    """ (R)ead: Lista todos os usuários. """
+    print(f"✅ {len(live_hosts)} dispositivos encontrados.")
+    
     conexao = conectar()
-    usuarios_db = conexao.execute("SELECT * FROM usuarios").fetchall()
+    data_hoje = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+    ids_encontrados_ip = []
+
+    for ip in live_hosts:
+        ids_encontrados_ip.append(ip)
+        
+        mac = 'N/A'
+        if 'mac' in nm[ip]['addresses']: mac = nm[ip]['addresses']['mac'].upper()
+        else:
+            try:
+                m = get_mac_address(ip=ip)
+                if m: mac = m.upper()
+            except: pass
+
+        vendor = ""
+        try:
+            if 'vendor' in nm[ip] and nm[ip]['vendor']:
+                vendor = list(nm[ip]['vendor'].values())[0].split(' ')[0]
+        except: pass
+
+        nome_final = ""
+        if 'hostnames' in nm[ip] and nm[ip]['hostnames']: nome_final = nm[ip]['hostnames'][0]['name']
+        if not nome_final: nome_final = netbios_lookup(ip)
+        if not nome_final:
+            nome_base = f"Dispositivo-{ip.split('.')[-1]}"
+            nome_final = f"{nome_base} ({vendor})" if vendor else nome_base
+
+        tipo_final = classificar_tipo_inteligente(nome_final, vendor)
+
+        cursor = conexao.execute("SELECT id FROM ativos_online WHERE ip_address = ? OR (mac_address = ? AND mac_address != 'N/A')", (ip, mac))
+        existe = cursor.fetchone()
+
+        if existe:
+            conexao.execute("UPDATE ativos_online SET status='Online', nome=?, tipo=?, data_inicio=? WHERE id=?", (nome_final, tipo_final, data_hoje, existe['id']))
+        else:
+            conexao.execute("INSERT INTO ativos_online (nome, ip_address, mac_address, status, condicao, tipo, data_inicio) VALUES (?, ?, ?, 'Online', 'Monitorado', ?, ?)", (nome_final, ip, mac, tipo_final, data_hoje))
+
+    if ids_encontrados_ip:
+        placeholders = ','.join('?' for _ in ids_encontrados_ip)
+        conexao.execute(f"UPDATE ativos_online SET status='Offline' WHERE ip_address NOT IN ({placeholders}) AND status='Online'", ids_encontrados_ip)
+    
+    conexao.commit()
     conexao.close()
-    return jsonify([dict(usuario) for usuario in usuarios_db])
+    return True
 
-@app.route('/api/usuarios', methods=['POST'])
-def add_usuario():
-    """ (C)reate: Adiciona um novo usuário (com senha). """
-    dados = request.json
-    nome = dados.get('nome')
-    email = dados.get('email')
-    senha = dados.get('senha')
-
-    if not nome or not email or not senha:
-        return jsonify({"erro": "Nome, email e senha são obrigatórios"}), 400
-
+# --- SCAN STATUS (Automático) ---
+def executar_scan_status_apenas():
+    nm = nmap.PortScanner()
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        cursor.execute(
-            "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
-            (nome, email, senha)
-        )
-        conexao.commit()
-        novo_id = cursor.lastrowid
-        conexao.close()
-        return jsonify({"mensagem": "Usuário adicionado com sucesso!", "id": novo_id}), 201
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+        nm.scan(hosts=TARGET_NETWORK, arguments='-sn -PR -T5')
+    except: return False
 
-@app.route('/api/usuarios/<int:id_usuario>', methods=['PUT'])
-def update_usuario(id_usuario):
-    """ (U)pdate: Atualiza um usuário. """
-    dados = request.json
-    nome = dados.get('nome')
-    email = dados.get('email')
-    senha = dados.get('senha')
+    ips_online = nm.all_hosts()
+    conexao = conectar()
+    
+    if ips_online:
+        placeholders = ','.join('?' for _ in ips_online)
+        conexao.execute(f"UPDATE ativos_online SET status='Online' WHERE ip_address IN ({placeholders})", ips_online)
+        conexao.execute(f"UPDATE ativos_online SET status='Offline' WHERE ip_address NOT IN ({placeholders})", ips_online)
+    
+    conexao.commit()
+    conexao.close()
+    return True
 
-    if not nome or not email or not senha:
-        return jsonify({"erro": "Nome, email e senha são obrigatórios"}), 400
+def monitor_background():
+    while True:
+        try:
+            time.sleep(30)
+            executar_scan_status_apenas()
+        except: pass
 
+monitor = threading.Thread(target=monitor_background, daemon=True)
+monitor.start()
+
+
+# =======================================================
+#   ROTAS DA API (ENDPOINTS) - AQUI ESTAVAM FALTANDO
+# =======================================================
+
+# 1. ROTA DE ATIVOS ONLINE (Correção do seu Erro 404)
+@app.route('/api/ativos-online', methods=['GET'])
+def get_ativos_online():
+    con = conectar()
+    # Retorna apenas quem está online para a página de monitoramento
+    res = con.execute("SELECT * FROM ativos_online WHERE status='Online'").fetchall()
+    con.close()
+    return jsonify([dict(x) for x in res])
+
+# 2. ROTA DE TIPOS PARA O GRÁFICO (Correção do outro Erro 404)
+@app.route('/api/estatisticas/tipos', methods=['GET'])
+def stats_types():
+    con = conectar()
+    res = con.execute("SELECT COALESCE(tipo, 'Outros') as tipo, COUNT(*) as contagem FROM ativos_online GROUP BY tipo").fetchall()
+    con.close()
+    return jsonify([{'tipo': r['tipo'], 'contagem': r['contagem']} for r in res])
+
+# 3. ROTA DE SCAN STATUS (Para o botão da página Online)
+@app.route('/api/scan-status', methods=['POST'])
+def rota_scan_status():
+    if executar_scan_status_apenas(): return jsonify({"msg": "OK"}), 200
+    return jsonify({"erro": "Falha"}), 500
+
+# 4. ROTA DE SCAN COMPLETO (Para o Inventário)
+@app.route('/api/scan-rede', methods=['POST'])
+def rota_scan_rede():
+    if executar_scan_completo(): return jsonify({"msg": "OK"}), 200
+    return jsonify({"erro": "Falha"}), 500
+
+# 5. ROTA DE RESET (Para zerar o banco)
+@app.route('/api/ativos/reset', methods=['DELETE'])
+def resetar_inventario():
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        cursor.execute(
-            "UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?",
-            (nome, email, senha, id_usuario)
-        )
-        conexao.commit()
-        
-        if cursor.rowcount == 0:
-            conexao.close()
-            return jsonify({"erro": "Usuário não encontrado"}), 404
-        
-        conexao.close()
-        return jsonify({"mensagem": "Usuário atualizado com sucesso!"})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+        con = conectar()
+        con.execute("DELETE FROM ativos_online")
+        con.execute("DELETE FROM sqlite_sequence WHERE name='ativos_online'")
+        con.commit()
+        con.close()
+        return jsonify({"msg": "OK"}), 200
+    except Exception as e: return jsonify({"erro": str(e)}), 500
 
-@app.route('/api/usuarios/<int:id_usuario>', methods=['DELETE'])
-def delete_usuario(id_usuario):
-    """ (D)elete: Deleta um usuário. """
-    try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        cursor.execute("DELETE FROM usuarios WHERE id = ?", (id_usuario,))
-        conexao.commit()
-
-        if cursor.rowcount == 0:
-            conexao.close()
-            return jsonify({"erro": "Usuário não encontrado"}), 404
-        
-        conexao.close()
-        return jsonify({"mensagem": "Usuário deletado com sucesso!"})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-
-# --- CRUD: ATIVOS ---
-
+# 6. CRUD GERAL (Listar todos, Adicionar, Editar, Excluir)
 @app.route('/api/ativos', methods=['GET'])
 def get_ativos():
-    """ (R)ead: Lista todos os ativos. """
-    conexao = conectar()
-    ativos_db = conexao.execute("SELECT * FROM ativos_online").fetchall()
-    conexao.close()
-    return jsonify([dict(ativo) for ativo in ativos_db])
+    con = conectar()
+    res = con.execute("SELECT * FROM ativos_online").fetchall()
+    con.close()
+    return jsonify([dict(x) for x in res])
 
 @app.route('/api/ativos', methods=['POST'])
 def add_ativo():
-    """ (C)reate: Adiciona um novo ativo E REGISTRA O ALERTA. """
-    dados = request.json
-    nome = dados.get('nome')
-    ip = dados.get('ip_address')
-    
-    # Recebe o tipo do ativo
-    tipo = dados.get('tipo', 'Outros') # Define 'Outros' como padrão se não for enviado
-    
-    if not nome:
-        return jsonify({"erro": "O campo 'nome' é obrigatório"}), 400
-    
-    data_inicio = datetime.datetime.now().isoformat()
-    mac = dados.get('mac_address')
-    status = dados.get('status', 'Pendente') 
-    condicao = dados.get('condicao', 'Desconhecida') 
-
+    d = request.json
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        cursor.execute(
-            "INSERT INTO ativos_online (nome, ip_address, mac_address, status, condicao, data_inicio, tipo) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (nome, ip, mac, status, condicao, data_inicio, tipo)
-        )
-        conexao.commit()
-        novo_id = cursor.lastrowid
-        conexao.close()
-        
-        registrar_alerta("Adição", f"Novo ativo entrou na rede: {nome} ({tipo}) (IP: {ip}, ID: {novo_id})")
-        
-        return jsonify({"mensagem": "Ativo adicionado e alerta registrado!", "id": novo_id}), 201
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+        con = conectar()
+        c = con.cursor()
+        c.execute("INSERT INTO ativos_online (nome, ip_address, mac_address, status, condicao, tipo, data_inicio) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                  (d['nome'], d['ip_address'], d['mac_address'], d.get('status','Pendente'), d.get('condicao','Monitorado'), d.get('tipo','Outros'), datetime.datetime.now().isoformat()))
+        con.commit()
+        nid = c.lastrowid
+        con.close()
+        return jsonify({"msg": "Criado", "id": nid}), 201
+    except Exception as e: return jsonify({"erro": str(e)}), 500
 
-@app.route('/api/ativos/<int:id_ativo>', methods=['PUT'])
-def update_ativo(id_ativo):
-    """ (U)pdate: Atualiza um ativo. """
-    dados = request.json
-    nome = dados.get('nome')
-    ip = dados.get('ip_address')
-    mac = dados.get('mac_address')
-    status = dados.get('status')
-    condicao = dados.get('condicao')
-    tipo = dados.get('tipo') 
-
-    if not nome or not status or not condicao:
-        return jsonify({"erro": "Nome, status e condição são campos obrigatórios"}), 400
-    
-    # Constrói o comando de UPDATE dinamicamente
-    sql_update = "UPDATE ativos_online SET nome = ?, ip_address = ?, mac_address = ?, status = ?, condicao = ?"
-    params = [nome, ip, mac, status, condicao]
-    
-    if tipo:
-        sql_update += ", tipo = ?"
-        params.append(tipo)
-
-    sql_update += " WHERE id = ?"
-    params.append(id_ativo)
-
+@app.route('/api/ativos/<int:id>', methods=['PUT'])
+def update_ativo(id):
+    d = request.json
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        cursor.execute(sql_update, tuple(params))
-        conexao.commit()
-        
-        if cursor.rowcount == 0:
-            conexao.close()
-            return jsonify({"erro": "Ativo não encontrado"}), 404
-        
-        conexao.close()
-        return jsonify({"mensagem": "Ativo atualizado com sucesso!"})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+        con = conectar()
+        con.execute("UPDATE ativos_online SET nome=?, ip_address=?, mac_address=?, status=?, condicao=?, tipo=? WHERE id=?", 
+                    (d['nome'], d['ip_address'], d['mac_address'], d['status'], d['condicao'], d.get('tipo'), id))
+        con.commit()
+        con.close()
+        return jsonify({"msg": "Atualizado"}), 200
+    except Exception as e: return jsonify({"erro": str(e)}), 500
 
-@app.route('/api/ativos/<int:id_ativo>', methods=['DELETE'])
-def delete_ativo(id_ativo):
-    """ (D)elete: Remove um ativo E REGISTRA O ALERTA. """
+@app.route('/api/ativos/<int:id>', methods=['DELETE'])
+def delete_ativo(id):
     try:
-        conexao = conectar()
-        cursor = conexao.cursor()
-        cursor.execute("SELECT nome, ip_address, tipo FROM ativos_online WHERE id = ?", (id_ativo,))
-        ativo = cursor.fetchone()
-        
-        if not ativo:
-            conexao.close()
-            return jsonify({"erro": "Ativo não encontrado"}), 404
+        con = conectar()
+        con.execute("DELETE FROM ativos_online WHERE id=?", (id,))
+        con.commit()
+        con.close()
+        return jsonify({"msg": "Deletado"}), 200
+    except Exception as e: return jsonify({"erro": str(e)}), 500
 
-        nome_ativo = ativo['nome']
-        ip_ativo = ativo['ip_address']
-        tipo_ativo = ativo['tipo'] 
-        
-        cursor.execute("DELETE FROM ativos_online WHERE id = ?", (id_ativo,))
-        conexao.commit()
-        conexao.close()
-        
-        registrar_alerta("Remoção", f"Ativo saiu da rede: {nome_ativo} ({tipo_ativo}) (IP: {ip_ativo}, ID: {id_ativo})")
-        
-        return jsonify({"mensagem": "Ativo deletado e alerta registrado!"})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+# 7. LOGIN / USUÁRIOS
+@app.route('/api/login', methods=['POST'])
+def login():
+    d = request.json
+    try:
+        con = conectar()
+        u = con.execute("SELECT * FROM usuarios WHERE email=?",(d.get('email'),)).fetchone()
+        con.close()
+        if u and u['senha']==d.get('senha'): 
+            return jsonify({"msg":"OK", "usuario": {"id":u['id'], "nome":u['nome'], "email":u['email']}}), 200
+        return jsonify({"erro":"Falha"}), 401
+    except Exception as e: return jsonify({"erro": str(e)}), 500
 
-# --- ROTAS DE LEITURA (Alertas e Estatísticas) ---
+@app.route('/api/usuarios', methods=['GET'])
+def get_usuarios():
+    con = conectar()
+    res = con.execute("SELECT * FROM usuarios").fetchall()
+    con.close()
+    return jsonify([dict(x) for x in res])
+
+@app.route('/api/usuarios', methods=['POST'])
+def add_usuario():
+    d = request.json
+    try:
+        con = conectar()
+        c = con.cursor()
+        c.execute("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)", (d['nome'], d['email'], d['senha']))
+        con.commit()
+        nid = c.lastrowid
+        con.close()
+        return jsonify({"id": nid}), 201
+    except Exception as e: return jsonify({"erro": str(e)}), 500
+
+@app.route('/api/usuarios/<int:id>', methods=['DELETE'])
+def delete_usuario(id):
+    try:
+        con = conectar()
+        con.execute("DELETE FROM usuarios WHERE id=?", (id,))
+        con.commit()
+        con.close()
+        return jsonify({"msg": "Deletado"}), 200
+    except Exception as e: return jsonify({"erro": str(e)}), 500
+
+# 8. ESTATÍSTICAS GERAIS
+@app.route('/api/estatisticas', methods=['GET'])
+def stats():
+    con = conectar()
+    t = con.execute("SELECT COUNT(*) FROM ativos_online").fetchone()[0]
+    on = con.execute("SELECT COUNT(*) FROM ativos_online WHERE status='Online'").fetchone()[0]
+    off = con.execute("SELECT COUNT(*) FROM ativos_online WHERE status='Offline'").fetchone()[0]
+    con.close()
+    return jsonify({'total_ativos':t, 'ativos_online':on, 'ativos_offline':off})
 
 @app.route('/api/alertas', methods=['GET'])
 def get_alertas():
-    """ (R)ead: Lista todos os alertas (os mais novos primeiro). """
-    conexao = conectar()
-    alertas_db = conexao.execute("SELECT * FROM alertas ORDER BY id DESC").fetchall()
-    conexao.close()
-    return jsonify([dict(alerta) for alerta in alertas_db])
+    con = conectar()
+    res = con.execute("SELECT * FROM alertas ORDER BY id DESC").fetchall()
+    con.close()
+    return jsonify([dict(x) for x in res])
 
 
-@app.route('/api/ativos-online', methods=['GET'])
-def get_ativos_online():
-    """ Retorna apenas os ativos com status 'Online'. """
-    conexao = conectar()
-    ativos_db = conexao.execute("SELECT * FROM ativos_online WHERE status = 'Online'").fetchall()
-    conexao.close()
-    return jsonify([dict(ativo) for ativo in ativos_db])
-
-
-@app.route('/api/estatisticas', methods=['GET'])
-def obter_estatisticas():
-    """ Retorna estatísticas rápidas para o dashboard. """
-    try:
-        conexao = conectar()
-        total_ativos = conexao.execute("SELECT COUNT(*) as c FROM ativos_online").fetchone()[0]
-        ativos_online = conexao.execute("SELECT COUNT(*) as c FROM ativos_online WHERE status = 'Online'").fetchone()[0]
-        ativos_offline = conexao.execute("SELECT COUNT(*) as c FROM ativos_online WHERE status = 'Offline'").fetchone()[0]
-        total_usuarios = conexao.execute("SELECT COUNT(*) as c FROM usuarios").fetchone()[0]
-        conexao.close()
-
-        return jsonify({
-            'total_ativos': total_ativos or 0,
-            'ativos_online': ativos_online or 0,
-            'ativos_offline': ativos_offline or 0,
-            'total_usuarios': total_usuarios or 0
-        })
-    except Exception as e:
-        return jsonify({'erro': str(e)}), 500
-        
-# --- ROTA PARA GRÁFICO DE TIPOS DE ATIVOS ---
-@app.route('/api/estatisticas/tipos', methods=['GET'])
-def obter_tipos_ativos():
-    """Retorna a contagem de ativos, agrupados pelo campo 'tipo'."""
-    try:
-        conexao = conectar()
-        # Usa COALESCE para tratar tipos NULL como 'Não Classificado'
-        query = "SELECT COALESCE(tipo, 'Não Classificado') as tipo, COUNT(*) as contagem FROM ativos_online GROUP BY tipo ORDER BY contagem DESC"
-        tipos_ativos_db = conexao.execute(query).fetchall()
-        conexao.close()
-        
-        resultado = [
-            {'tipo': item['tipo'], 'contagem': item['contagem']} 
-            for item in tipos_ativos_db
-        ]
-        
-        return jsonify(resultado)
-    except Exception as e:
-        print(f"Erro ao obter tipos de ativos: {e}")
-        return jsonify({'erro': str(e)}), 500
-
-
-# --- Ponto de Partida: Roda o Servidor ---
 if __name__ == '__main__':
-    # 1. Garante que todas as tabelas existam
-    criar_tabelas_iniciais() 
-    
-    # 2. Inicia o servidor da API
-    print("=========================================================")
-    print(" Servidor da API Mestre (Usuários, Ativos, Alertas)")
-    print(" Rodando em: http://127.0.0.1:5000")
-    print(" Use (Ctrl+C) para parar o servidor.")
-    print("=========================================================")
+    criar_tabelas_iniciais()
+    print(f"\n--- SERVIDOR ONLINE: http://127.0.0.1:5000 ({TARGET_NETWORK}) ---\n")
     app.run(host='127.0.0.1', port=5000, debug=True)

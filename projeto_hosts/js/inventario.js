@@ -1,445 +1,231 @@
 /**
- * Script para gerenciar o inventário de ativos
- * Puxa dados DIRETO DO BANCO DE DADOS via API
+ * ARQUIVO: js/inventario.js
+ * Gerencia a tabela, o scan de rede, os modais e o CRUD.
  */
 
-// ==================== VARIÁVEIS GLOBAIS ====================
+let listaGlobalAtivos = [];
+const API_BASE_URL = 'http://127.0.0.1:5000/api'; 
 
-let ativos = []; // Array que armazena todos os ativos do banco
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 Inventário Iniciado");
+    
+    carregarDadosInventario(); 
+    configurarBusca();
+    
+    // AUTO-REFRESH (30s): APENAS LÊ O BANCO (GET)
+    // Não faz scan na rede aqui para não pesar e não duplicar lógica.
+    setInterval(carregarDadosInventario, 30000);
+});
 
-// ==================== CARREGAR ATIVOS DO BANCO ====================
-
-async function carregarAtivosDoBank() {
-    try {
-        const response = await fetch('/api/ativos');
-        const dados = await response.json();
-        
-        ativos = dados;
-        console.log('✅ Ativos carregados do banco:', ativos);
-        
-        // Renderizar a tabela
-        renderizarTabela(ativos);
-        
-    } catch (error) {
-        console.error('❌ Erro ao carregar ativos:', error);
-        mostrarToast('Erro ao carregar ativos do banco!', 'error');
-    }
-}
-
-// ==================== RENDERIZAR TABELA ====================
-
-function renderizarTabela(ativosParaMostrar) {
+// --- 1. LEITURA (GET) ---
+async function carregarDadosInventario() {
     const tbody = document.getElementById('inventory-table-body');
-    
-    if (!tbody) {
-        console.warn('⚠️ Elemento tbody não encontrado');
-        return;
+    if(!tbody) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/ativos`);
+        const data = await response.json();
+        listaGlobalAtivos = data;
+        preencherTabela(data);
+    } catch (error) {
+        console.error("Erro leitura:", error);
     }
-    
-    // Limpar tabela
-    tbody.innerHTML = '';
-    
-    // Se não tem ativos
-    if (!ativosParaMostrar || ativosParaMostrar.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">Nenhum ativo encontrado</td></tr>';
-        return;
-    }
-    
-    // Renderizar cada ativo
-    ativosParaMostrar.forEach((ativo, index) => {
-        const row = document.createElement('tr');
-        
-        // Badge de status com cor
-        const statusBadge = ativo.status === 'Online' 
-            ? `<span class="badge badge-online">${ativo.status}</span>`
-            : `<span class="badge badge-offline">${ativo.status}</span>`;
-        
-        // Badge de condição
-        let condiacaoBadge = '';
-        switch(ativo.condicao) {
-            case 'Disponível':
-                condiacaoBadge = '<span class="badge badge-disponivel">Disponível</span>';
-                break;
-            case 'Manutenção':
-                condiacaoBadge = '<span class="badge badge-manutencao">Manutenção</span>';
-                break;
-            case 'Alocado':
-                condiacaoBadge = '<span class="badge badge-alocado">Alocado</span>';
-                break;
-            default:
-                condiacaoBadge = `<span class="badge">${ativo.condicao}</span>`;
-        }
-        
-        row.innerHTML = `
-            <td class="asset-name">
-                <strong>${ativo.nome || 'N/A'}</strong>
-            </td>
-            <td class="asset-mac">${ativo.mac_address || 'N/A'}</td>
-            <td class="asset-id">
-                ${ativo.ip_address || 'N/A'}
-            </td>
-            <td class="asset-status">
-                ${statusBadge}
-            </td>
-            <td class="asset-condition">
-                ${condiacaoBadge}
-            </td>
-            <td class="asset-actions">
-                <button class="btn-edit" onclick="editarAtivo(${index})" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn-delete" onclick="abrirDeleteModal(${index})" title="Deletar">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        `;
-        
-        tbody.appendChild(row);
-    });
-    
-    console.log(`✅ Tabela renderizada com ${ativosParaMostrar.length} ativos`);
 }
 
-// ==================== BUSCA E FILTRO ====================
+// --- 2. SCAN REAL (POST) - APENAS NO BOTÃO ---
+// Adiciona novos ativos e atualiza existentes. NÃO deleta o banco.
+window.atualizarComScan = async function() {
+    const btn = document.getElementById('refresh-btn');
+    
+    if(btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando Novos Ativos...';
+    }
+    
+    if(window.showToast) window.showToast('Varrendo a rede por novos dispositivos...', 'info');
+
+    try {
+        // Chama o scan completo do Python
+        const responseScan = await fetch(`${API_BASE_URL}/scan-rede`, { method: 'POST' });
+
+        if (!responseScan.ok) throw new Error('Erro no scan');
+
+        // Recarrega a tabela com as novidades
+        await carregarDadosInventario(); 
+        
+        if(window.showToast) window.showToast('Inventário atualizado com sucesso!', 'success');
+
+    } catch (error) {
+        console.error(error);
+        if(window.showToast) window.showToast('Erro ao escanear.', 'error');
+    } finally {
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Atualizar';
+        }
+    }
+}
+
+// --- 3. TABELA ---
+function preencherTabela(dados) {
+    const tbody = document.getElementById('inventory-table-body');
+    if(!tbody) return;
+    tbody.innerHTML = ''; 
+
+    if (!dados.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Nenhum ativo encontrado.</td></tr>';
+        return;
+    }
+
+    dados.forEach(ativo => {
+        const tr = document.createElement('tr');
+        const statusBadge = ativo.status === 'Online' 
+            ? `<span class="badge badge-online">Online</span>` 
+            : `<span class="badge badge-offline">Offline</span>`;
+
+        const acoesHTML = `
+            <div class="action-icons">
+                <i class="bi bi-pencil-square" onclick="prepararEdicao(${ativo.id})" title="Editar"></i>
+                <i class="bi bi-trash" onclick="prepararExclusao(${ativo.id}, '${ativo.nome}')" title="Excluir"></i>
+            </div>
+        `;
+
+        tr.innerHTML = `
+            <td><strong>${ativo.nome || 'Sem Nome'}</strong></td>
+            <td>${ativo.mac_address || '-'}</td>
+            <td>${ativo.ip_address || '-'}</td>
+            <td>${statusBadge}</td>
+            <td>${ativo.condicao || '-'}</td>
+            <td>${acoesHTML}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// --- 4. MODAIS E CRUD (GLOBAL) ---
 
 function configurarBusca() {
     const searchInput = document.getElementById('search-input');
-    
-    if (!searchInput) {
-        console.warn('⚠️ Input de busca não encontrado');
-        return;
-    }
-    
-    searchInput.addEventListener('input', (e) => {
-        const termo = e.target.value.toLowerCase();
-        
-        // Filtrar ativos baseado no termo
-        const ativosFiltrados = ativos.filter(ativo => {
-            return (
-                (ativo.nome && ativo.nome.toLowerCase().includes(termo)) ||
-                (ativo.ip_address && ativo.ip_address.includes(termo)) ||
-                (ativo.mac_address && ativo.mac_address.toLowerCase().includes(termo)) ||
-                (ativo.status && ativo.status.toLowerCase().includes(termo))
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const filtrados = listaGlobalAtivos.filter(a => 
+                (a.nome && a.nome.toLowerCase().includes(termo)) ||
+                (a.ip_address && a.ip_address.includes(termo)) ||
+                (a.mac_address && a.mac_address.toLowerCase().includes(termo))
             );
+            preencherTabela(filtrados);
         });
-        
-        renderizarTabela(ativosFiltrados);
-    });
-}
-
-// ==================== MODAL PARA ADICIONAR/EDITAR ====================
-
-function abrirModalAdicionar() {
-    const modal = document.getElementById('asset-modal');
-    const modalTitle = document.getElementById('modal-title');
-    
-    if (!modal) {
-        console.warn('⚠️ Modal não encontrado');
-        return;
-    }
-    
-    modalTitle.textContent = 'Adicionar Novo Ativo';
-    document.getElementById('asset-form').reset();
-    document.getElementById('assetIndex').value = '';
-    
-    modal.classList.add('show');
-}
-
-function fecharModal() {
-    const modal = document.getElementById('asset-modal');
-    if (modal) {
-        modal.classList.remove('show');
     }
 }
 
-function editarAtivo(index) {
-    const ativo = ativos[index];
-    const modal = document.getElementById('asset-modal');
-    const modalTitle = document.getElementById('modal-title');
-    
-    if (!modal || !ativo) {
-        return;
+window.abrirModalAdicionar = function() {
+    const m = document.getElementById('asset-modal');
+    if(m) {
+        document.getElementById('modal-title').innerText = "Adicionar Novo Ativo";
+        document.getElementById('assetIdDatabase').value = ""; // ID Vazio = Novo
+        document.getElementById('asset-form').reset();
+        m.style.display = 'flex';
     }
-    
-    modalTitle.textContent = 'Editar Ativo';
-    
-    // Preencher formulário
-    document.getElementById('assetName').value = ativo.nome || '';
-    document.getElementById('macAddress').value = ativo.mac_address || '';
-    document.getElementById('assetId').value = ativo.ip_address || '';
-    document.getElementById('assetStatus').value = ativo.status || 'Online';
-    document.getElementById('assetCondition').value = ativo.condicao || 'Disponível';
-    document.getElementById('assetIndex').value = index;
-    
-    modal.classList.add('show');
 }
 
-function abrirDeleteModal(index) {
-    const ativo = ativos[index];
-    const deleteModal = document.getElementById('delete-confirm-modal');
+window.prepararEdicao = function(id) {
+    const ativo = listaGlobalAtivos.find(a => a.id === id);
+    if (!ativo) return;
     
-    if (!deleteModal || !ativo) {
-        return;
-    }
+    const m = document.getElementById('asset-modal');
+    document.getElementById('modal-title').innerText = "Editar Ativo";
     
-    document.getElementById('asset-name-to-delete').textContent = ativo.nome;
-    document.getElementById('confirm-delete-btn').dataset.index = index;
+    // Preenche o ID para que o salvamento saiba que é edição
+    document.getElementById('assetIdDatabase').value = ativo.id;
     
-    deleteModal.classList.add('show');
+    document.getElementById('assetName').value = ativo.nome;
+    document.getElementById('macAddress').value = ativo.mac_address;
+    document.getElementById('assetId').value = ativo.ip_address;
+    document.getElementById('assetStatus').value = ativo.status;
+    
+    if(document.getElementById('assetCondition')) document.getElementById('assetCondition').value = ativo.condicao;
+    if(document.getElementById('assetType')) document.getElementById('assetType').value = ativo.tipo || 'Outros';
+    
+    m.style.display = 'flex';
 }
 
-// ==================== SALVAR ATIVO ====================
+window.prepararExclusao = function(id, nome) {
+    const m = document.getElementById('delete-confirm-modal');
+    document.getElementById('asset-name-to-delete').innerText = nome;
+    document.getElementById('delete-id-target').value = id;
+    m.style.display = 'flex';
+}
 
-async function salvarAtivo(event) {
-    event.preventDefault();
+window.fecharModais = function() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+}
+
+// SALVAR (Novo ou Edição)
+window.salvarAtivo = async function(event) {
+    event.preventDefault(); 
     
-    const assetIndex = document.getElementById('assetIndex').value;
-    const nome = document.getElementById('assetName').value;
-    const macAddress = document.getElementById('macAddress').value;
-    const ip = document.getElementById('assetId').value;
-    const status = document.getElementById('assetStatus').value;
-    const condicao = document.getElementById('assetCondition').value;
+    // Pega o ID do campo oculto correto
+    const id = document.getElementById('assetIdDatabase').value;
     
-    // Validação
-    if (!nome || !macAddress || !ip) {
-        mostrarToast('Preencha todos os campos obrigatórios!', 'warning');
-        return;
-    }
-    
+    const dados = {
+        nome: document.getElementById('assetName').value,
+        mac_address: document.getElementById('macAddress').value,
+        ip_address: document.getElementById('assetId').value,
+        status: document.getElementById('assetStatus').value,
+        condicao: document.getElementById('assetCondition') ? document.getElementById('assetCondition').value : 'Disponível'
+    };
+    if(document.getElementById('assetType')) dados.tipo = document.getElementById('assetType').value;
+
+    // Se tem ID, é PUT (Atualizar). Se não, é POST (Criar).
+    const metodo = id ? 'PUT' : 'POST';
+    const url = id ? `${API_BASE_URL}/ativos/${id}` : `${API_BASE_URL}/ativos`;
+
     try {
-        // Se é edição
-        if (assetIndex !== '') {
-            const ativoAtual = ativos[assetIndex];
-            const ativoId = ativoAtual.id;
-            
-            // Enviar PUT para atualizar no banco
-            const response = await fetch(`/api/ativos/${ativoId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    nome,
-                    mac_address: macAddress,
-                    ip_address: ip,
-                    status,
-                    condicao
-                })
-            });
-            
-            if (!response.ok) {
-                const erro = await response.json();
-                throw new Error(erro.erro || 'Erro ao atualizar ativo');
-            }
-            
-            const resultado = await response.json();
-            console.log('✅ Ativo atualizado no banco:', resultado.ativo);
-            mostrarToast('Ativo atualizado com sucesso!', 'success');
-            
-        } else {
-            // Se é novo ativo
-            const response = await fetch('/api/ativos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    nome,
-                    mac_address: macAddress,
-                    ip_address: ip,
-                    status,
-                    condicao
-                })
-            });
-            
-            if (!response.ok) {
-                const erro = await response.json();
-                throw new Error(erro.erro || 'Erro ao criar ativo');
-            }
-            
-            const resultado = await response.json();
-            console.log('✅ Novo ativo criado no banco:', resultado.ativo);
-            mostrarToast('Ativo adicionado com sucesso!', 'success');
-        }
-        
-        // Fechar modal
-        fecharModal();
-        
-        // Recarregar ativos do banco
-        await carregarAtivosDoBank();
-        
-        // Sincronizar dashboard
-        sincronizarDashboard();
-        
-    } catch (error) {
-        console.error('❌ Erro ao salvar ativo:', error);
-        mostrarToast('Erro ao salvar ativo: ' + error.message, 'error');
+        const response = await fetch(url, {
+            method: metodo,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        });
+
+        if (!response.ok) throw new Error('Falha ao salvar');
+
+        fecharModais();
+        carregarDadosInventario();
+        if(window.showToast) window.showToast(id ? 'Ativo atualizado!' : 'Ativo criado!', 'success');
+    } catch (e) { 
+        console.error(e);
+        if(window.showToast) window.showToast('Erro ao salvar.', 'error');
     }
 }
 
-// ==================== DELETAR ATIVO ====================
-
-async function deletarAtivo(index) {
-    if (index < 0 || index >= ativos.length) {
-        return;
-    }
-    
-    const ativo = ativos[index];
-    const ativoId = ativo.id;
-    
+// EXCLUIR
+window.confirmarExclusao = async function() {
+    const id = document.getElementById('delete-id-target').value;
     try {
-        // Enviar DELETE para o banco
-        const response = await fetch(`/api/ativos/${ativoId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            const erro = await response.json();
-            throw new Error(erro.erro || 'Erro ao deletar ativo');
-        }
-        
-        const resultado = await response.json();
-        console.log('✅ Ativo deletado do banco:', resultado);
-        mostrarToast('Ativo deletado com sucesso!', 'success');
-        
-        // Fechar modal de confirmação
-        const deleteModal = document.getElementById('delete-confirm-modal');
-        if (deleteModal) {
-            deleteModal.classList.remove('show');
-        }
-        
-        // Recarregar ativos do banco
-        await carregarAtivosDoBank();
-        
-        // Sincronizar dashboard
-        sincronizarDashboard();
-        
-    } catch (error) {
-        console.error('❌ Erro ao deletar ativo:', error);
-        mostrarToast('Erro ao deletar ativo: ' + error.message, 'error');
-    }
+        await fetch(`${API_BASE_URL}/ativos/${id}`, { method: 'DELETE' });
+        fecharModais();
+        carregarDadosInventario();
+        if(window.showToast) window.showToast('Excluído!', 'success');
+    } catch (e) { console.error(e); }
 }
 
-// ==================== TOAST (NOTIFICAÇÕES) ====================
-
-function mostrarToast(mensagem, tipo = 'info') {
-    const container = document.getElementById('toast-container');
-    
-    if (!container) {
-        console.warn('⚠️ Toast container não encontrado');
-        return;
-    }
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${tipo}`;
-    toast.textContent = mensagem;
-    
-    container.appendChild(toast);
-    
-    // Remover após 3 segundos
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+// ZERAR BANCO
+window.abrirModalReset = function() {
+    const m = document.getElementById('reset-confirm-modal');
+    if(m) m.style.display = 'flex';
 }
 
-// ==================== INICIALIZAÇÃO ====================
-
-/**
- * Sincronizar com o dashboard em tempo real
- * Dispara eventos para atualizar gráficos e estatísticas
- */
-function sincronizarDashboard() {
-    // Disparar evento customizado para o dashboard escutar
-    const evento = new CustomEvent('ativosAtualizados', {
-        detail: { ativos: ativos }
-    });
-    window.dispatchEvent(evento);
-    
-    console.log('📡 Dashboard sincronizado');
-    console.log('📊 Total de ativos:', ativos.length);
-    console.log('🟢 Ativos Online:', ativos.filter(a => a.status === 'Online').length);
-    console.log('🔴 Ativos Offline:', ativos.filter(a => a.status === 'Offline').length);
+window.confirmarResetBanco = async function() {
+    const btn = document.querySelector('#reset-confirm-modal .btn-confirm-delete');
+    if(btn) { btn.innerText = "Apagando..."; btn.disabled = true; }
+    try {
+        await fetch(`${API_BASE_URL}/ativos/reset`, { method: 'DELETE' });
+        if(window.showToast) window.showToast('Banco zerado!', 'success');
+        fecharModais();
+        carregarDadosInventario(); 
+    } catch (e) { console.error(e); }
+    finally {
+        if(btn) { btn.innerText = "APAGAR TUDO"; btn.disabled = false; }
+    }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📋 Inicializando página de inventário...');
-    
-    // Carregar ativos do banco
-    carregarAtivosDoBank();
-    
-    // Configurar busca
-    configurarBusca();
-    
-    // Botão para adicionar novo ativo
-    const addBtn = document.getElementById('add-asset-btn');
-    if (addBtn) {
-        addBtn.addEventListener('click', abrirModalAdicionar);
-    }
-    
-    // Formulário de ativo
-    const assetForm = document.getElementById('asset-form');
-    if (assetForm) {
-        assetForm.addEventListener('submit', salvarAtivo);
-    }
-    
-    // Botão para cancelar modal
-    const cancelBtn = document.getElementById('cancel-btn');
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', fecharModal);
-    }
-    
-    // Modal de deletar
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    if (cancelDeleteBtn) {
-        cancelDeleteBtn.addEventListener('click', () => {
-            const deleteModal = document.getElementById('delete-confirm-modal');
-            if (deleteModal) {
-                deleteModal.classList.remove('show');
-            }
-        });
-    }
-    
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', () => {
-            const index = confirmDeleteBtn.dataset.index;
-            deletarAtivo(parseInt(index));
-        });
-    }
-    
-    // Fechar modal ao clicar fora
-    const modal = document.getElementById('asset-modal');
-    const deleteModal = document.getElementById('delete-confirm-modal');
-    
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                fecharModal();
-            }
-        });
-    }
-    
-    if (deleteModal) {
-        deleteModal.addEventListener('click', (e) => {
-            if (e.target === deleteModal) {
-                deleteModal.classList.remove('show');
-            }
-        });
-    }
-    
-    // Escutar eventos de atualização do dashboard
-    window.addEventListener('ativosAtualizados', (e) => {
-        console.log('📡 Evento de sincronização recebido');
-    });
-    
-    console.log('✅ Página de inventário iniciada');
-});
-
-// Recarregar ativos a cada 30 segundos
-setInterval(() => {
-    carregarAtivosDoBank();
-    sincronizarDashboard();
-}, 30000);
